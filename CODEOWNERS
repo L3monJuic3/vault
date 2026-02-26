@@ -1,0 +1,14 @@
+# CODEOWNERS
+# Vault — Code Ownership for Review Gating
+# Human review required for critical paths
+
+# Database models and migrations — always human review
+apps/api/app/models/ @L3monJuic3
+apps/api/alembic/ @L3monJuic3
+
+# Infrastructure
+docker/ @L3monJuic3
+.github/workflows/ @L3monJuic3
+
+# Agent config
+.claude/ @L3monJuic3

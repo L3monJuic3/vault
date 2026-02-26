@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Build
+.next/
+dist/
+build/
+*.egg
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker/data/
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Worktrees
+.worktrees/
+worktrees/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Misc
+*.log
+.turbo/
