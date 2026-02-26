@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import get_current_user
+from app.models.user import User
 from app.schemas.transaction import CursorPage, TransactionRead, TransactionUpdate
 from app.services.transaction_service import (
     bulk_update_category,
@@ -35,18 +37,8 @@ async def list_transactions(
     amount_max: Decimal | None = Query(None),
     search: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    # For now, use a hardcoded user_id since auth middleware is being built by another worker
-    # This will be replaced with get_current_user dependency after auth merges
-    from sqlalchemy import select
-
-    from app.models.user import User
-
-    result = await db.execute(select(User).limit(1))
-    user = result.scalar_one_or_none()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No user found")
-
     items, next_cursor, has_more = await get_transactions(
         db,
         user.id,
@@ -71,16 +63,8 @@ async def list_transactions(
 async def get_transaction(
     transaction_id: UUID,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    from sqlalchemy import select
-
-    from app.models.user import User
-
-    result = await db.execute(select(User).limit(1))
-    user = result.scalar_one_or_none()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No user found")
-
     txn = await get_transaction_by_id(db, transaction_id, user.id)
     if txn is None:
         raise HTTPException(status_code=404, detail="Transaction not found")
@@ -92,16 +76,8 @@ async def patch_transaction(
     transaction_id: UUID,
     update_data: TransactionUpdate,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    from sqlalchemy import select
-
-    from app.models.user import User
-
-    result = await db.execute(select(User).limit(1))
-    user = result.scalar_one_or_none()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No user found")
-
     txn = await update_transaction(
         db,
         transaction_id,
@@ -117,16 +93,8 @@ async def patch_transaction(
 async def bulk_assign_category(
     body: BulkCategoryRequest,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    from sqlalchemy import select
-
-    from app.models.user import User
-
-    result = await db.execute(select(User).limit(1))
-    user = result.scalar_one_or_none()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No user found")
-
     count = await bulk_update_category(
         db, body.transaction_ids, body.category_id, user.id
     )

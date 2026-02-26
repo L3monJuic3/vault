@@ -128,11 +128,10 @@ async def test_list_subscriptions_returns_items_and_total():
 
 
 @pytest.mark.asyncio
-async def test_list_subscriptions_401_when_no_user():
-    """GET /api/v1/subscriptions returns 401 when no user exists."""
-    db = _mock_db_session(user=None)
-
+async def test_list_subscriptions_401_when_auth_required_no_token():
+    """GET /api/v1/subscriptions returns 401 when auth is required and no token is provided."""
     app = _make_test_app()
+    db = _mock_db_session(user=None)
 
     async def override_get_db():
         yield db
@@ -143,10 +142,12 @@ async def test_list_subscriptions_401_when_no_user():
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.get("/api/v1/subscriptions")
+        with patch("app.middleware.auth.settings") as mock_settings:
+            mock_settings.auth_required = True
+            mock_settings.jwt_secret = "change-me-in-production"
+            response = await client.get("/api/v1/subscriptions")
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "No user found"
 
 
 # ---------------------------------------------------------------------------
@@ -221,7 +222,18 @@ async def test_update_subscription_404_when_missing():
 @pytest.mark.asyncio
 async def test_patch_invalid_uuid_returns_422():
     """PATCH with an invalid UUID should return 422 (validation error)."""
+    user = _fake_user()
+    db = _mock_db_session(user)
+
     app = _make_test_app()
+
+    async def override_get_db():
+        yield db
+
+    from app.database import get_db
+
+    app.dependency_overrides[get_db] = override_get_db
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.patch(

@@ -86,11 +86,10 @@ async def test_list_transactions_returns_empty_list():
 
 
 @pytest.mark.asyncio
-async def test_list_transactions_401_when_no_user():
-    """GET /api/v1/transactions returns 401 when no user exists in the DB."""
-    db = _mock_db_session(user=None)
-
+async def test_list_transactions_401_when_auth_required_no_token():
+    """GET /api/v1/transactions returns 401 when auth is required and no token is provided."""
     app = _make_test_app()
+    db = _mock_db_session(user=None)
 
     async def override_get_db():
         yield db
@@ -101,10 +100,12 @@ async def test_list_transactions_401_when_no_user():
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.get("/api/v1/transactions")
+        with patch("app.middleware.auth.settings") as mock_settings:
+            mock_settings.auth_required = True
+            mock_settings.jwt_secret = "change-me-in-production"
+            response = await client.get("/api/v1/transactions")
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "No user found"
 
 
 @pytest.mark.asyncio
