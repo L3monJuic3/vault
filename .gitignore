@@ -12,6 +12,7 @@ venv/
 dist/
 build/
 *.egg
+*.tsbuildinfo
 
 # Environment
 .env
