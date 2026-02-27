@@ -51,6 +51,7 @@ export default function DashboardPage() {
 
       {/* Charts row */}
       <div
+        className="animate-fade-in-up stagger-3"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 340px",
@@ -64,6 +65,7 @@ export default function DashboardPage() {
 
       {/* Bottom row */}
       <div
+        className="animate-fade-in-up stagger-5"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 300px",
