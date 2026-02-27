@@ -18,9 +18,7 @@ async def get_account_by_id(
     db: AsyncSession, account_id: UUID, user_id: UUID
 ) -> Account | None:
     """Get a single account scoped to user."""
-    query = select(Account).where(
-        Account.id == account_id, Account.user_id == user_id
-    )
+    query = select(Account).where(Account.id == account_id, Account.user_id == user_id)
     result = await db.execute(query)
     return result.scalar_one_or_none()
 

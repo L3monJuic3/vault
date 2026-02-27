@@ -39,6 +39,7 @@ async def detailed_health(db: AsyncSession = Depends(get_db)):
     t = time.perf_counter()
     try:
         import redis.asyncio as aioredis
+
         r = aioredis.from_url(settings.redis_url, socket_connect_timeout=2)
         await r.ping()
         await r.aclose()
@@ -57,6 +58,7 @@ async def detailed_health(db: AsyncSession = Depends(get_db)):
     t = time.perf_counter()
     try:
         from app.tasks.celery_app import celery_app
+
         inspect = celery_app.control.inspect(timeout=2)
         active = inspect.ping()
         if active:
@@ -82,7 +84,9 @@ async def detailed_health(db: AsyncSession = Depends(get_db)):
     # ── AI (Anthropic key present?) ───────────────────────────────────
     services["ai"] = {
         "status": "ok" if settings.anthropic_api_key else "warning",
-        "error": None if settings.anthropic_api_key else "ANTHROPIC_API_KEY not set — AI features disabled",
+        "error": None
+        if settings.anthropic_api_key
+        else "ANTHROPIC_API_KEY not set — AI features disabled",
     }
 
     # ── Overall status ────────────────────────────────────────────────
@@ -104,14 +108,20 @@ async def detailed_health(db: AsyncSession = Depends(get_db)):
 
 @router.get("/logs")
 async def get_system_logs(
-    level: str | None = Query(None, description="Filter by level: DEBUG INFO WARNING ERROR CRITICAL"),
-    category: str | None = Query(None, description="Filter by category: http parse ai auth system task"),
+    level: str | None = Query(
+        None, description="Filter by level: DEBUG INFO WARNING ERROR CRITICAL"
+    ),
+    category: str | None = Query(
+        None, description="Filter by category: http parse ai auth system task"
+    ),
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     """Retrieve structured log entries, newest first."""
-    logs = await get_logs(db, level=level, category=category, limit=limit, offset=offset)
+    logs = await get_logs(
+        db, level=level, category=category, limit=limit, offset=offset
+    )
     counts = await get_log_counts(db)
 
     return {
@@ -147,6 +157,9 @@ async def write_test_log(db: AsyncSession = Depends(get_db)):
         level="INFO",
         category="system",
         message="Debug test log entry written successfully",
-        detail={"source": "debug endpoint", "timestamp": datetime.now(timezone.utc).isoformat()},
+        detail={
+            "source": "debug endpoint",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        },
     )
     return {"ok": True, "message": "Test log written"}

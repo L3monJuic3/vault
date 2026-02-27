@@ -9,7 +9,13 @@ class SystemLog(Base, TimestampMixin):
 
     __tablename__ = "system_logs"
 
-    level = Column(String(16), nullable=False, index=True)       # DEBUG INFO WARNING ERROR CRITICAL
-    category = Column(String(32), nullable=False, index=True)    # http parse ai auth system task
+    level = Column(
+        String(16), nullable=False, index=True
+    )  # DEBUG INFO WARNING ERROR CRITICAL
+    category = Column(
+        String(32), nullable=False, index=True
+    )  # http parse ai auth system task
     message = Column(Text, nullable=False)
-    detail = Column(JSONB, nullable=True)                        # extra context — request path, traceback, etc.
+    detail = Column(
+        JSONB, nullable=True
+    )  # extra context — request path, traceback, etc.

@@ -72,7 +72,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             raise
 
 
-async def _write_log(level: str, category: str, message: str, detail: dict | None = None) -> None:
+async def _write_log(
+    level: str, category: str, message: str, detail: dict | None = None
+) -> None:
     """Write a log entry using a fresh DB session — independent of the request session."""
     try:
         async with AsyncSessionLocal() as db:

@@ -7,7 +7,9 @@ from app.models.base import Base, TimestampMixin
 class Import(Base, TimestampMixin):
     __tablename__ = "imports"
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
     account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False)
     filename = Column(String, nullable=False)
     file_type = Column(String(8), nullable=False)

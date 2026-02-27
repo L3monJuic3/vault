@@ -12,6 +12,7 @@ from app.models.transaction import Transaction
 
 # ── Format detection ──────────────────────────────────────────────────────────
 
+
 def detect_format(filename: str, content: str) -> str | None:
     """
     Detect the bank format from the CSV headers or filename.
@@ -42,6 +43,7 @@ def detect_format(filename: str, content: str) -> str | None:
 
 # ── Duplicate detection ───────────────────────────────────────────────────────
 
+
 def _txn_hash(account_id: uuid.UUID, date: Any, amount: Any, description: str) -> str:
     """Stable hash for duplicate detection: account + date + amount + description."""
     key = f"{account_id}|{date.date() if hasattr(date, 'date') else date}|{amount}|{description.strip().lower()}"
@@ -51,8 +53,9 @@ def _txn_hash(account_id: uuid.UUID, date: Any, amount: Any, description: str) -
 async def get_existing_hashes(db: AsyncSession, account_id: uuid.UUID) -> set[str]:
     """Load all existing transaction hashes for this account."""
     result = await db.execute(
-        select(Transaction.date, Transaction.amount, Transaction.description)
-        .where(Transaction.account_id == account_id)
+        select(Transaction.date, Transaction.amount, Transaction.description).where(
+            Transaction.account_id == account_id
+        )
     )
     return {
         _txn_hash(account_id, row.date, row.amount, row.description)
@@ -61,6 +64,7 @@ async def get_existing_hashes(db: AsyncSession, account_id: uuid.UUID) -> set[st
 
 
 # ── Account resolution ────────────────────────────────────────────────────────
+
 
 async def get_or_create_account(
     db: AsyncSession,
@@ -75,7 +79,9 @@ async def get_or_create_account(
         "amex": ("Amex", AccountType.credit_card),
         "hsbc": ("HSBC", AccountType.current),
     }
-    provider, account_type = provider_map.get(bank_format, ("Unknown", AccountType.current))
+    provider, account_type = provider_map.get(
+        bank_format, ("Unknown", AccountType.current)
+    )
 
     # Try to find existing account for this provider
     result = await db.execute(
@@ -104,6 +110,7 @@ async def get_or_create_account(
 
 
 # ── Main import function ──────────────────────────────────────────────────────
+
 
 async def process_import(
     db: AsyncSession,
@@ -176,6 +183,7 @@ async def process_import(
         txn_date = row["date"]
         if hasattr(txn_date, "tzinfo") and txn_date.tzinfo is None:
             from datetime import timezone as tz
+
             txn_date = txn_date.replace(tzinfo=tz.utc)
 
         txn = Transaction(
@@ -198,11 +206,19 @@ async def process_import(
     import_record.duplicates_skipped = duplicates
     import_record.status = "completed"
     if dates:
-        import_record.date_range_start = min(d.date() if hasattr(d, "date") else d for d in dates)
-        import_record.date_range_end = max(d.date() if hasattr(d, "date") else d for d in dates)
+        import_record.date_range_start = min(
+            d.date() if hasattr(d, "date") else d for d in dates
+        )
+        import_record.date_range_end = max(
+            d.date() if hasattr(d, "date") else d for d in dates
+        )
 
     # Update account balance to most recent balance_after if available
-    balance_rows = [(t.date, t.balance_after) for t in new_transactions if t.balance_after is not None]
+    balance_rows = [
+        (t.date, t.balance_after)
+        for t in new_transactions
+        if t.balance_after is not None
+    ]
     if balance_rows:
         latest_balance = sorted(balance_rows, key=lambda x: x[0])[-1][1]
         account.current_balance = latest_balance

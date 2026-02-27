@@ -54,8 +54,8 @@ async def get_logs(
 async def get_log_counts(db: AsyncSession) -> dict[str, int]:
     """Return count of logs by level for the summary header."""
     from sqlalchemy import func
+
     result = await db.execute(
-        select(SystemLog.level, func.count(SystemLog.id))
-        .group_by(SystemLog.level)
+        select(SystemLog.level, func.count(SystemLog.id)).group_by(SystemLog.level)
     )
     return {row[0]: row[1] for row in result.all()}

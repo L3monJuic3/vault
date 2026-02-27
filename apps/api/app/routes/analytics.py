@@ -33,7 +33,9 @@ async def category_breakdown(
     user: User = Depends(get_current_user),
 ):
     """Spending breakdown by category."""
-    return await get_category_breakdown(db, user.id, date_from=date_from, date_to=date_to)
+    return await get_category_breakdown(
+        db, user.id, date_from=date_from, date_to=date_to
+    )
 
 
 @router.get("/timeline")

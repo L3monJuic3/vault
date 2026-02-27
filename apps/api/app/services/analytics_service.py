@@ -107,12 +107,18 @@ async def get_category_breakdown(
     )
 
     if date_from:
-        query = query.where(Transaction.date >= datetime.combine(date_from, datetime.min.time()))
+        query = query.where(
+            Transaction.date >= datetime.combine(date_from, datetime.min.time())
+        )
     if date_to:
-        query = query.where(Transaction.date <= datetime.combine(date_to, datetime.max.time()))
+        query = query.where(
+            Transaction.date <= datetime.combine(date_to, datetime.max.time())
+        )
 
     query = query.group_by(Category.id, Category.name, Category.icon, Category.colour)
-    query = query.order_by(func.sum(Transaction.amount).asc())  # most spent first (negative)
+    query = query.order_by(
+        func.sum(Transaction.amount).asc()
+    )  # most spent first (negative)
 
     result = await db.execute(query)
     rows = result.all()
@@ -152,7 +158,11 @@ async def get_spend_timeline(
         elif granularity == "weekly":
             date_from = date_to - timedelta(weeks=12)
         else:
-            date_from = date(date_to.year - 1 if date_to.month <= 6 else date_to.year, (date_to.month - 6) % 12 or 12, 1)
+            date_from = date(
+                date_to.year - 1 if date_to.month <= 6 else date_to.year,
+                (date_to.month - 6) % 12 or 12,
+                1,
+            )
 
     # Pull all transactions in range
     query = (
@@ -211,7 +221,9 @@ async def get_top_merchants(
 
     query = (
         select(
-            func.coalesce(Transaction.merchant_name, Transaction.description).label("merchant"),
+            func.coalesce(Transaction.merchant_name, Transaction.description).label(
+                "merchant"
+            ),
             func.sum(Transaction.amount).label("total"),
             func.count(Transaction.id).label("transaction_count"),
             Category.name.label("category_name"),
@@ -225,9 +237,13 @@ async def get_top_merchants(
     )
 
     if date_from:
-        query = query.where(Transaction.date >= datetime.combine(date_from, datetime.min.time()))
+        query = query.where(
+            Transaction.date >= datetime.combine(date_from, datetime.min.time())
+        )
     if date_to:
-        query = query.where(Transaction.date <= datetime.combine(date_to, datetime.max.time()))
+        query = query.where(
+            Transaction.date <= datetime.combine(date_to, datetime.max.time())
+        )
 
     query = (
         query.group_by(

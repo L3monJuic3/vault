@@ -22,12 +22,21 @@ def upgrade() -> None:
     op.create_table(
         "imports",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False),
-        sa.Column("account_id", UUID(as_uuid=True), sa.ForeignKey("accounts.id"), nullable=False),
+        sa.Column(
+            "user_id", UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False
+        ),
+        sa.Column(
+            "account_id",
+            UUID(as_uuid=True),
+            sa.ForeignKey("accounts.id"),
+            nullable=False,
+        ),
         sa.Column("filename", sa.String(), nullable=False),
         sa.Column("file_type", sa.String(8), nullable=False),
         sa.Column("row_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("duplicates_skipped", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column(
+            "duplicates_skipped", sa.Integer(), nullable=False, server_default="0"
+        ),
         sa.Column("date_range_start", sa.Date(), nullable=True),
         sa.Column("date_range_end", sa.Date(), nullable=True),
         sa.Column("status", sa.String(16), nullable=False, server_default="processing"),
