@@ -20,12 +20,13 @@ export function Sidebar() {
       style={{
         width: "220px",
         minHeight: "100vh",
-        background: "var(--sidebar)",
+        background: "linear-gradient(180deg, #0a0a0e 0%, #0c0c12 100%)",
         borderRight: "1px solid var(--sidebar-border)",
         display: "flex",
         flexDirection: "column",
         flexShrink: 0,
       }}
+      className="sidebar-root"
     >
       {/* Logo */}
       <div
@@ -34,7 +35,7 @@ export function Sidebar() {
           borderBottom: "1px solid var(--sidebar-border)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="sidebar-logo" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div
             style={{
               width: "28px",
@@ -75,25 +76,40 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
+              className="sidebar-nav-item"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "7px 8px",
+                padding: "7px 10px",
                 marginBottom: "2px",
-                borderRadius: "var(--radius-sm)",
-                borderLeft: isActive
-                  ? "2px solid var(--sidebar-item-active-border)"
-                  : "2px solid transparent",
+                borderRadius: "var(--radius)",
                 background: isActive ? "var(--sidebar-item-active)" : "transparent",
+                boxShadow: isActive ? "0 0 12px var(--glow-primary)" : "none",
                 color: isActive ? "var(--foreground)" : "var(--foreground-muted)",
                 textDecoration: "none",
                 fontSize: "13px",
                 fontWeight: isActive ? 500 : 400,
-                transition: "background 0.1s, color 0.1s",
+                transition: "all 0.2s var(--transition-snappy)",
+                position: "relative",
               }}
             >
-              <Icon active={isActive} />
+              {isActive && (
+                <span
+                  className="animate-pulse-glow"
+                  style={{
+                    position: "absolute",
+                    left: "4px",
+                    width: "4px",
+                    height: "4px",
+                    borderRadius: "50%",
+                    background: "var(--primary)",
+                  }}
+                />
+              )}
+              <span style={{ marginLeft: isActive ? "8px" : "0", transition: "margin 0.2s var(--transition-snappy)" }}>
+                <Icon active={isActive} />
+              </span>
               {label}
             </Link>
           );
@@ -112,6 +128,25 @@ export function Sidebar() {
       >
         v0.1.0
       </div>
+
+      <style jsx>{`
+        .sidebar-root {
+          transition: transform 0.3s var(--transition-snappy);
+        }
+        @media (max-width: 768px) {
+          .sidebar-root {
+            display: none;
+          }
+        }
+        .sidebar-logo:hover {
+          opacity: 0.85;
+        }
+        .sidebar-nav-item:hover {
+          background: var(--sidebar-item-hover) !important;
+          color: var(--foreground) !important;
+          transform: translateX(2px);
+        }
+      `}</style>
     </aside>
   );
 }
