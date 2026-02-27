@@ -1,43 +1,74 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap");
 
+/* Dark mode is primary — matches design spec */
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --background: #0c0c0f;
+  --surface: #111116;
+  --surface-raised: #18181f;
+  --foreground: #f0f0f5;
+  --foreground-muted: #6b7280;
+  --foreground-subtle: #374151;
+
+  --card: #111116;
+  --card-foreground: #f0f0f5;
+  --card-border: #1f1f28;
+
   --primary: #6366f1;
+  --primary-hover: #4f51e0;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --border: #e2e8f0;
-  --ring: #6366f1;
-  --radius: 0.5rem;
-  --success: #22c55e;
+
+  --sidebar: #0c0c0f;
+  --sidebar-border: #1a1a24;
+  --sidebar-item-hover: #18181f;
+  --sidebar-item-active: #1e1e2c;
+  --sidebar-item-active-border: #6366f1;
+
+  --success: #10b981;
   --warning: #f59e0b;
+  --destructive: #ef4444;
+  --income: #10b981;
+  --spending: #ef4444;
+
+  --border: #1f1f28;
+  --border-subtle: #161620;
+  --ring: #6366f1;
+  --radius: 5px;
+  --radius-sm: 4px;
+  --radius-lg: 6px;
+
+  --muted: #18181f;
+  --muted-foreground: #6b7280;
+
+  /* Mono font for numbers/data */
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Light mode override (secondary, but supported) */
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #fafafa;
-    --card: #1a1a2e;
-    --card-foreground: #fafafa;
-    --primary: #818cf8;
-    --primary-foreground: #0a0a0a;
-    --secondary: #1e293b;
-    --secondary-foreground: #f8fafc;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-    --accent: #1e293b;
-    --accent-foreground: #f8fafc;
-    --destructive: #f87171;
-    --border: #334155;
-    --ring: #818cf8;
+    --background: #f8f8fc;
+    --surface: #ffffff;
+    --surface-raised: #f1f1f7;
+    --foreground: #0c0c0f;
+    --foreground-muted: #6b7280;
+    --foreground-subtle: #d1d5db;
+
+    --card: #ffffff;
+    --card-foreground: #0c0c0f;
+    --card-border: #e5e5ef;
+
+    --sidebar: #ffffff;
+    --sidebar-border: #e5e5ef;
+    --sidebar-item-hover: #f4f4f9;
+    --sidebar-item-active: #eeeef8;
+    --sidebar-item-active-border: #6366f1;
+
+    --border: #e5e5ef;
+    --border-subtle: #f0f0f7;
+    --muted: #f4f4f9;
+    --muted-foreground: #9ca3af;
   }
 }
 
@@ -47,8 +78,36 @@
   padding: 0;
 }
 
+html {
+  color-scheme: dark;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mono numbers utility */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Scrollbar — subtle */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-subtle);
 }

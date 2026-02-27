@@ -14,3 +14,6 @@ async def get_db():
         except Exception:
             await session.rollback()
             raise
+
+# Alias used by middleware (needs a session factory outside of request context)
+AsyncSessionLocal = async_session
