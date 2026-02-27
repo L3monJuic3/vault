@@ -4,10 +4,12 @@ import { useState } from "react";
 import { CategoriesTab } from "@/components/settings/CategoriesTab";
 import { ExportTab } from "@/components/settings/ExportTab";
 import { AccountsTab } from "@/components/settings/AccountsTab";
+import { ImportHistoryTab } from "@/components/settings/ImportHistoryTab";
 
 const tabs = [
   { id: "categories", label: "Categories" },
   { id: "accounts", label: "Accounts" },
+  { id: "imports", label: "Import History" },
   { id: "export", label: "Export" },
 ] as const;
 
@@ -44,6 +46,7 @@ export default function SettingsPage() {
 
       {activeTab === "categories" && <CategoriesTab />}
       {activeTab === "accounts" && <AccountsTab />}
+      {activeTab === "imports" && <ImportHistoryTab />}
       {activeTab === "export" && <ExportTab />}
     </main>
   );
