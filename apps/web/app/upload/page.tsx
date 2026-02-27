@@ -215,8 +215,8 @@ export default function UploadPage() {
               {[
                 { bank: "American Express", format: "CSV", status: "✓ Supported" },
                 { bank: "HSBC", format: "CSV", status: "✓ Supported" },
-                { bank: "Monzo", format: "CSV", status: "Coming soon" },
-                { bank: "Starling", format: "CSV", status: "Coming soon" },
+                { bank: "Monzo", format: "CSV", status: "✓ Supported" },
+                { bank: "Starling", format: "CSV", status: "✓ Supported" },
               ].map((row) => (
                 <tr key={row.bank} style={{ borderBottom: "1px solid var(--border)" }}>
                   <td style={{ padding: "8px 0", color: "var(--foreground)" }}>{row.bank}</td>

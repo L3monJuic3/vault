@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Column, Date, Enum, ForeignKey, Numeric, String, Text
+from sqlalchemy import Column, Date, ForeignKey, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.models.base import Base, TimestampMixin
@@ -34,12 +34,10 @@ class RecurringGroup(Base, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
     name = Column(String, nullable=False)
-    type = Column(Enum(RecurringType), nullable=False)
-    frequency = Column(Enum(Frequency), nullable=False)
+    type = Column(String(16), nullable=False)
+    frequency = Column(String(16), nullable=False)
     estimated_amount = Column(Numeric(12, 2), nullable=False)
-    status = Column(
-        Enum(RecurringStatus), nullable=False, default=RecurringStatus.active
-    )
+    status = Column(String(16), nullable=False, default="active")
     category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
     merchant_name = Column(String, nullable=True)
     next_expected_date = Column(Date, nullable=True)
