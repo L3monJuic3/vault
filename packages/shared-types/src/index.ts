@@ -123,6 +123,13 @@ export interface AccountRead {
   created_at: string;
 }
 
+export interface AccountUpdate {
+  name?: string;
+  provider?: string;
+  current_balance?: number;
+  is_active?: boolean;
+}
+
 export interface BulkCategoryRequest {
   transaction_ids: string[];
   category_id: string;
