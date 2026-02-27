@@ -158,10 +158,14 @@ export function TransactionTable() {
                         </td>
                       </tr>
                     ))
-                  : transactions.map((txn) => (
+                  : transactions.map((txn, index) => (
                       <tr
                         key={txn.id}
-                        className="border-b border-[var(--border)] transition-colors hover:bg-[var(--accent)]"
+                        className="animate-fade-in-up border-b border-[var(--border)] transition-all duration-150 hover:bg-[var(--accent)]"
+                        style={{
+                          animationDelay: `${Math.min(index * 30, 300)}ms`,
+                          position: "relative",
+                        }}
                       >
                         <td className="p-3">
                           <input
@@ -203,7 +207,7 @@ export function TransactionTable() {
                               className="cursor-pointer"
                             >
                               {txn.category_id ? (
-                                <Badge variant="secondary">
+                                <Badge variant="info">
                                   {getCategoryName(txn.category_id) ||
                                     "Unknown"}
                                 </Badge>
@@ -215,8 +219,9 @@ export function TransactionTable() {
                         </td>
                         <td
                           className={`p-3 text-right text-sm font-medium ${
-                            txn.amount >= 0 ? "text-[var(--success)]" : ""
+                            txn.amount >= 0 ? "text-[var(--success)]" : "text-[var(--destructive)]"
                           }`}
+                          style={{ fontFamily: "var(--font-mono)" }}
                         >
                           {formatCurrency(txn.amount)}
                         </td>

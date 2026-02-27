@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCountUp } from "@/hooks/use-count-up";
 import { useSubscriptions, useDismissSubscription } from "@/hooks/use-subscriptions";
 import type { RecurringGroupRead } from "@vault/shared-types";
 
@@ -29,6 +30,22 @@ function monthlyEquivalent(sub: RecurringGroupRead): number {
   }
 }
 
+function AnimatedTotal({ value }: { value: number }) {
+  const animated = useCountUp(value, 800);
+  return (
+    <p
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: "22px",
+        fontWeight: 700,
+        color: "var(--foreground)",
+      }}
+    >
+      {formatCurrency(animated)}
+    </p>
+  );
+}
+
 function StatusBadge({ status }: { status: RecurringGroupRead["status"] }) {
   const styles: Record<string, { bg: string; color: string }> = {
     active: { bg: "rgba(16, 185, 129, 0.12)", color: "var(--success)" },
@@ -46,19 +63,39 @@ function StatusBadge({ status }: { status: RecurringGroupRead["status"] }) {
         borderRadius: "20px",
         background: s.bg,
         color: s.color,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
       }}
     >
+      {status === "active" && (
+        <span
+          className="animate-pulse-glow"
+          style={{
+            width: "5px",
+            height: "5px",
+            borderRadius: "50%",
+            background: "var(--success)",
+            display: "inline-block",
+          }}
+        />
+      )}
       {status}
     </span>
   );
 }
 
-function SubscriptionCard({ sub }: { sub: RecurringGroupRead }) {
+function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: number }) {
   const dismiss = useDismissSubscription();
   const monthly = monthlyEquivalent(sub);
 
   return (
-    <Card>
+    <Card
+      className={`animate-fade-in-up stagger-${Math.min(index + 1, 6)}`}
+      style={{
+        transition: "all 0.2s var(--transition-snappy)",
+      }}
+    >
       <CardContent style={{ padding: "16px" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -118,6 +155,7 @@ function SubscriptionCard({ sub }: { sub: RecurringGroupRead }) {
                 padding: "4px 10px",
                 border: "1px solid var(--border)",
                 borderRadius: "var(--radius-sm)",
+                transition: "all 0.15s",
               }}
             >
               Cancel ↗
@@ -135,6 +173,7 @@ function SubscriptionCard({ sub }: { sub: RecurringGroupRead }) {
                 borderRadius: "var(--radius-sm)",
                 padding: "4px 10px",
                 cursor: "pointer",
+                transition: "all 0.15s",
               }}
             >
               Dismiss
@@ -161,6 +200,44 @@ function SkeletonCard() {
   );
 }
 
+function EmptyState() {
+  return (
+    <div
+      className="animate-fade-in-up"
+      style={{
+        padding: "48px 32px",
+        textAlign: "center",
+        border: "1px dashed var(--border)",
+        borderRadius: "var(--radius-lg)",
+      }}
+    >
+      {/* Inline wallet SVG */}
+      <svg
+        width="64"
+        height="64"
+        viewBox="0 0 64 64"
+        fill="none"
+        style={{ margin: "0 auto 16px", opacity: 0.4 }}
+      >
+        <rect x="8" y="16" width="48" height="36" rx="4" stroke="var(--foreground-muted)" strokeWidth="2" />
+        <path d="M8 24H56" stroke="var(--foreground-muted)" strokeWidth="2" />
+        <rect x="40" y="30" width="12" height="8" rx="2" stroke="var(--foreground-muted)" strokeWidth="2" />
+        <circle cx="46" cy="34" r="1.5" fill="var(--foreground-muted)" />
+        <path d="M16 16V14C16 11.79 17.79 10 20 10H44C46.21 10 48 11.79 48 14V16" stroke="var(--foreground-muted)" strokeWidth="2" />
+      </svg>
+      <p style={{ color: "var(--foreground-muted)", fontSize: "14px", marginBottom: "4px" }}>
+        No active subscriptions detected yet.
+      </p>
+      <p style={{ fontSize: "13px" }}>
+        <a href="/upload" style={{ color: "var(--primary)", textDecoration: "none" }}>
+          Upload a statement
+        </a>{" "}
+        <span style={{ color: "var(--foreground-muted)" }}>to get started.</span>
+      </p>
+    </div>
+  );
+}
+
 export default function SubscriptionsPage() {
   const { data, isLoading } = useSubscriptions();
 
@@ -168,7 +245,7 @@ export default function SubscriptionsPage() {
   const inactive = data?.items.filter((s) => s.status !== "active") ?? [];
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: "1100px", margin: "0 auto" }}>
+    <div className="animate-fade-in-up" style={{ padding: "28px 32px", maxWidth: "1100px", margin: "0 auto" }}>
       {/* Header */}
       <div
         style={{
@@ -196,6 +273,7 @@ export default function SubscriptionsPage() {
 
         {data && (
           <div
+            className="animate-fade-in-up stagger-1"
             style={{
               textAlign: "right",
               padding: "12px 16px",
@@ -207,16 +285,7 @@ export default function SubscriptionsPage() {
             <p style={{ fontSize: "11px", color: "var(--foreground-muted)", marginBottom: "2px" }}>
               Total monthly
             </p>
-            <p
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "22px",
-                fontWeight: 700,
-                color: "var(--foreground)",
-              }}
-            >
-              {formatCurrency(data.monthly_total)}
-            </p>
+            <AnimatedTotal value={data.monthly_total} />
           </div>
         )}
       </div>
@@ -241,25 +310,10 @@ export default function SubscriptionsPage() {
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : active.length === 0 ? (
-          <div
-            style={{
-              padding: "32px",
-              textAlign: "center",
-              color: "var(--foreground-muted)",
-              fontSize: "13px",
-              border: "1px dashed var(--border)",
-              borderRadius: "var(--radius)",
-            }}
-          >
-            No active subscriptions detected yet.{" "}
-            <a href="/upload" style={{ color: "var(--primary)", textDecoration: "none" }}>
-              Upload a statement
-            </a>{" "}
-            to get started.
-          </div>
+          <EmptyState />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
-            {active.map((sub) => <SubscriptionCard key={sub.id} sub={sub} />)}
+            {active.map((sub, i) => <SubscriptionCard key={sub.id} sub={sub} index={i} />)}
           </div>
         )}
       </div>
@@ -280,7 +334,7 @@ export default function SubscriptionsPage() {
             Inactive · {inactive.length}
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
-            {inactive.map((sub) => <SubscriptionCard key={sub.id} sub={sub} />)}
+            {inactive.map((sub, i) => <SubscriptionCard key={sub.id} sub={sub} index={i} />)}
           </div>
         </div>
       )}
