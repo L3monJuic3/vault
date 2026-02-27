@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.account import Account, AccountType
+from app.models.account import Account
 from app.models.import_record import Import
 from app.models.transaction import Transaction
 
@@ -76,12 +76,10 @@ async def get_or_create_account(
     In V1 single-user mode, one account per bank provider.
     """
     provider_map = {
-        "amex": ("Amex", AccountType.credit_card),
-        "hsbc": ("HSBC", AccountType.current),
+        "amex": ("Amex", "credit_card"),
+        "hsbc": ("HSBC", "current"),
     }
-    provider, account_type = provider_map.get(
-        bank_format, ("Unknown", AccountType.current)
-    )
+    provider, account_type = provider_map.get(bank_format, ("Unknown", "current"))
 
     # Try to find existing account for this provider
     result = await db.execute(

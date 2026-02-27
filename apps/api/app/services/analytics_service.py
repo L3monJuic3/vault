@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.account import Account
 from app.models.category import Category
-from app.models.recurring_group import Frequency, RecurringGroup, RecurringStatus
+from app.models.recurring_group import RecurringGroup
 from app.models.transaction import Transaction
 
 
@@ -55,7 +55,7 @@ async def get_dashboard_stats(db: AsyncSession, user_id: UUID) -> dict:
     # Active subscription monthly total
     sub_query = select(RecurringGroup).where(
         RecurringGroup.user_id == user_id,
-        RecurringGroup.status == RecurringStatus.active,
+        RecurringGroup.status == "active",
     )
     sub_result = await db.execute(sub_query)
     subscriptions = sub_result.scalars().all()
@@ -63,13 +63,13 @@ async def get_dashboard_stats(db: AsyncSession, user_id: UUID) -> dict:
     subscription_total = Decimal("0")
     for sub in subscriptions:
         amount = sub.estimated_amount or Decimal("0")
-        if sub.frequency == Frequency.weekly:
+        if sub.frequency == "weekly":
             subscription_total += amount * 52 / 12
-        elif sub.frequency == Frequency.monthly:
+        elif sub.frequency == "monthly":
             subscription_total += amount
-        elif sub.frequency == Frequency.quarterly:
+        elif sub.frequency == "quarterly":
             subscription_total += amount / 3
-        elif sub.frequency == Frequency.annual:
+        elif sub.frequency == "annual":
             subscription_total += amount / 12
 
     return {
