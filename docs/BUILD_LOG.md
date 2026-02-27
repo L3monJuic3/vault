@@ -455,3 +455,216 @@ Already completed as part of Wave 0 scaffold.
 **Backend files:** ~45 Python files
 **Frontend files:** ~25 TypeScript/TSX files
 **Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md
+
+---
+
+## Ian's V1 Deliverables — Session 2 (2026-02-27)
+
+**Builder:** Ian (Claude Code agent)
+**Tasks:** CI hotfixes + remaining V1 backlog items
+**Commits:** 9
+
+---
+
+### CI Hotfixes (blocking develop branch)
+
+#### Fix 1: Ruff formatting
+
+**What was fixed:**
+- 11 Python files failing `ruff format --check` in CI
+- Ran `ruff format .` from `apps/api/` to auto-fix all formatting issues
+
+**Files modified:**
+- `apps/api/alembic/versions/006_imports.py`
+- `apps/api/app/database.py`
+- `apps/api/app/middleware/logging.py`
+- `apps/api/app/models/import_record.py`
+- `apps/api/app/models/system_log.py`
+- `apps/api/app/routes/analytics.py`
+- `apps/api/app/routes/debug.py`
+- `apps/api/app/services/account_service.py`
+- `apps/api/app/services/analytics_service.py`
+- `apps/api/app/services/import_service.py`
+- `apps/api/app/services/log_service.py`
+
+**Commit:** `fix(api): apply ruff formatting to all Python files`
+
+#### Fix 2: pnpm version conflict
+
+**What was fixed:**
+- CI failing with "Multiple versions of pnpm specified" — `ci.yml` sets `version: 9` but root `package.json` had `"packageManager": "pnpm@9.0.0"` which conflicts with `pnpm/action-setup@v4`
+- Removed the `packageManager` field from root `package.json`
+
+**Files modified:**
+- `package.json`
+
+**Commit:** `fix(ci): remove duplicate pnpm version from package.json`
+
+---
+
+### Task 1A-05: Insight Model + Migration 007
+
+**What was implemented:**
+- SQLAlchemy `Insight` model linked to users for AI-generated financial insights
+- Columns: id (UUID PK), user_id (FK), type (VARCHAR), title (VARCHAR), body (TEXT), data (JSONB), is_read (BOOLEAN), created_at (TIMESTAMPTZ)
+- Composite indexes: `(user_id, created_at DESC)` and `(user_id, is_read)`
+- Follows TimestampMixin pattern from all other models
+- Alembic migration 007 with upgrade/downgrade
+
+**Files created:**
+- `apps/api/app/models/insight.py`
+- `apps/api/alembic/versions/007_insights.py`
+
+**Files modified:**
+- `apps/api/app/models/__init__.py` — registered Insight export
+
+**Commit:** `feat(models): add Insight model and migration 007`
+
+---
+
+### Settings: Accounts Tab
+
+**What was implemented:**
+- `AccountsTab` component listing all user accounts (name, type, current balance)
+- Inline rename with keyboard support (Enter to save, Escape to cancel)
+- Toggle account active/inactive with status badge
+- `useAccounts` + `useUpdateAccount` TanStack Query hooks
+- Loading skeleton and empty state
+- `AccountUpdate` added to shared types
+
+**Files created:**
+- `apps/web/components/settings/AccountsTab.tsx`
+- `apps/web/hooks/use-accounts.ts`
+
+**Files modified:**
+- `apps/web/app/settings/page.tsx` — added Accounts tab
+- `packages/shared-types/src/index.ts` — added `AccountUpdate` interface
+
+**Commit:** `feat(settings): add accounts management tab`
+
+---
+
+### Settings: Import History Tab
+
+**What was implemented:**
+- `ImportHistoryTab` component with table showing past imports
+- Columns: filename, date imported, row count, duplicates skipped, status badge (completed/failed/processing), date range covered
+- `useImports` hook for `GET /api/v1/imports`
+- Loading skeleton and empty state
+- `ImportRead` added to shared types
+
+**Files created:**
+- `apps/web/components/settings/ImportHistoryTab.tsx`
+- `apps/web/hooks/use-imports.ts`
+
+**Files modified:**
+- `apps/web/app/settings/page.tsx` — added Import History tab
+- `packages/shared-types/src/index.ts` — added `ImportRead` interface
+
+**Commit:** `feat(settings): add import history tab`
+
+---
+
+### Task 1B-09: Type Generation Pipeline
+
+**What was implemented:**
+- Added `openapi-typescript` as devDependency to `@vault/shared-types`
+- Added `generate:types` script to shared-types `package.json`
+- Updated `scripts/generate-types.sh` to use correct `openapi-typescript` binary and output path
+- Added `packages/shared-types/README.md` explaining regeneration workflow
+
+**Files created:**
+- `packages/shared-types/README.md`
+
+**Files modified:**
+- `packages/shared-types/package.json` — added scripts + devDeps
+- `scripts/generate-types.sh` — fixed binary name and paths
+
+**Commit:** `feat(types): add openapi-ts type generation pipeline`
+
+---
+
+### Monzo CSV Parser
+
+**What was implemented:**
+- Monzo CSV parser handling: Date (DD/MM/YYYY), Name (merchant), Amount (pre-signed), Description, Notes
+- Merges Notes into description for richer transaction context
+- Sample fixture with 6 representative transactions (card payments, salary, direct debit)
+- 9 unit tests: count, signs, dates, merchants, notes, description fallback, empty input, missing fields
+- Registered in `parsers/__init__.py`
+
+**Files created:**
+- `apps/api/app/services/parsers/monzo.py`
+- `apps/api/tests/test_parser_monzo.py`
+- `apps/api/tests/fixtures/monzo_sample.csv`
+
+**Files modified:**
+- `apps/api/app/services/parsers/__init__.py` — registered `parse_monzo_csv`
+
+**Test results:** 9/9 passing
+
+**Commit:** `feat(import): add Monzo CSV parser`
+
+---
+
+### Starling CSV Parser
+
+**What was implemented:**
+- Starling CSV parser handling: Date (DD/MM/YYYY), Counter Party (merchant), Reference (description), Amount (pre-signed), Balance
+- Dynamic header matching for `Amount (GBP)` and `Balance (GBP)` columns
+- Sample fixture with 6 representative transactions
+- 9 unit tests: count, signs, dates, merchants, descriptions, balance, empty input, missing fields
+- Registered in `parsers/__init__.py`
+
+**Files created:**
+- `apps/api/app/services/parsers/starling.py`
+- `apps/api/tests/test_parser_starling.py`
+- `apps/api/tests/fixtures/starling_sample.csv`
+
+**Files modified:**
+- `apps/api/app/services/parsers/__init__.py` — registered `parse_starling_csv`
+
+**Test results:** 9/9 passing
+
+**Commit:** `feat(import): add Starling CSV parser`
+
+---
+
+### Lint Fix: input.tsx
+
+**What was fixed:**
+- 1 error: `React` referenced as global namespace but never imported
+- 2 warnings: empty interface `InputProps` extending `React.InputHTMLAttributes` (no-empty-interface rule)
+- Replaced with `import type { InputHTMLAttributes } from "react"` and type alias
+
+**Files modified:**
+- `apps/web/components/ui/input.tsx`
+
+**Commit:** `fix(ui): resolve eslint error and warnings in input.tsx`
+
+---
+
+## Updated Summary
+
+| Wave | Tasks | Workers | Status |
+|------|-------|---------|--------|
+| 0 | Repo setup + scaffold | Orchestrator | Done |
+| 1 | P0-07 CI pipeline | 1 | Done |
+| 2 | P0-03 + P0-05 + P0-06 (+ P0-09) | 1 (sequential) | Done |
+| 3 | 1A-01 + 1A-02 + 1A-03 | 1 (sequential) | Done |
+| 4 | 1A-06-E ∥ 1A-07-E | 2 (parallel) | Done |
+| 5 | 1B-01 ∥ 1B-04 ∥ 1B-06 ∥ 1C-01 | 4 (parallel) | Done |
+| 6 | 1C-04 ∥ 1C-05 ∥ 1C-09/10 ∥ 1C-11 | 4 (parallel) | Done |
+| 7 | Stubs + 1D-06 ∥ 1D-07 ∥ 1D-08 ∥ 1D-09 | 1 + 4 (parallel) | Done |
+| 8 | 1D-11-E ∥ 1E-04 | 2 (parallel) | Done |
+| 9 | 1E-01-E ∥ 1E-05-E | 2 (parallel) | Done |
+| Ian | CI fixes + V1 backlog | 1 | Done |
+
+**Total commits:** 53
+**Total parser tests:** 49 passing (Amex 7 + HSBC 12 + Monzo 9 + Starling 9 + AI 12)
+**Bank parsers:** 4 (Amex, HSBC, Monzo, Starling)
+**Settings tabs:** 4 (Categories, Accounts, Import History, Export)
+**Alembic migrations:** 7 (001–007)
+**Backend files:** ~50 Python files
+**Frontend files:** ~30 TypeScript/TSX files
+**Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md, shared-types README.md
