@@ -39,10 +39,14 @@ def upgrade() -> None:
     )
 
     # ── recurring_groups.status: recurringstatus → varchar(16) ──
+    # Must drop the server default first — it references the enum type
+    # ('active'::recurringstatus), which blocks DROP TYPE.
+    op.execute("ALTER TABLE recurring_groups ALTER COLUMN status DROP DEFAULT")
     op.execute(
         "ALTER TABLE recurring_groups "
         "ALTER COLUMN status TYPE VARCHAR(16) USING status::text"
     )
+    op.execute("ALTER TABLE recurring_groups ALTER COLUMN status SET DEFAULT 'active'")
 
     # ── Drop orphaned ENUM types ──
     op.execute("DROP TYPE IF EXISTS accounttype")
