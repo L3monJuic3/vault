@@ -230,14 +230,6 @@ export function TransactionDetail({
             )}
           </DetailRow>
 
-          {transaction.account_name && (
-            <DetailRow label="Account">
-              <span style={{ fontSize: 13, color: "var(--foreground)" }}>
-                {transaction.account_name}
-              </span>
-            </DetailRow>
-          )}
-
           {/* Category selector */}
           <div style={{ marginTop: 20 }}>
             <span className="label" style={{ display: "block", marginBottom: 8 }}>
