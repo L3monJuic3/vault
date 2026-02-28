@@ -2,7 +2,7 @@ import hashlib
 import uuid
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.account import Account
@@ -245,15 +245,29 @@ async def process_import(
             for d in dates  # type: ignore[misc]
         )
 
-    # Update account balance to most recent balance_after if available
+    # Update account balance to most recent balance_after if available,
+    # but only when the import batch is at least as recent as existing data
+    # to avoid overwriting a newer balance with an older statement.
     balance_rows = [
         (t.date, t.balance_after)
         for t in new_transactions
         if t.balance_after is not None
     ]
     if balance_rows:
-        latest_balance = sorted(balance_rows, key=lambda x: x[0])[-1][1]
-        account.current_balance = latest_balance  # type: ignore[assignment]
+        latest_balance_date, latest_balance = sorted(balance_rows, key=lambda x: x[0])[-1]
+        existing_latest_result = await db.execute(
+            select(func.max(Transaction.date))
+            .where(Transaction.account_id == account.id)
+            .where(
+                or_(
+                    Transaction.import_id != import_record.id,
+                    Transaction.import_id.is_(None),
+                )
+            )
+        )
+        existing_latest_date = existing_latest_result.scalar()
+        if existing_latest_date is None or latest_balance_date >= existing_latest_date:
+            account.current_balance = latest_balance  # type: ignore[assignment]
 
     await db.commit()
     await db.refresh(import_record)
