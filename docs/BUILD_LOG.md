@@ -900,3 +900,203 @@ Subscriptions page:
 **Frontend files:** ~30 TypeScript/TSX files
 **UI animations:** fadeInUp, shimmer, pulse-glow, dash-march, checkmark-draw, progress-fill, count-up
 **Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md, shared-types README.md
+
+---
+
+## Ian's Session 4 — Clean & Minimal Theme + Settings Overhaul (2026-02-27)
+
+**Builder:** Ian (Claude Code agent)
+**Tasks:** Theme system, colour palette overhaul, light/dark/system mode, glow removal, Appearance + Profile settings tabs
+**Commits:** 7
+
+---
+
+### Commit 1: Theme Store + Provider
+
+**What was implemented:**
+- Zustand store (`use-theme.ts`) with `persist` middleware — stores `mode` (`light`/`dark`/`system`) and `accent` colour, persisted to `localStorage` key `vault-theme`
+- `ThemeProvider.tsx` — resolves theme mode, sets `data-theme` attribute on `<html>`, applies `colorScheme`, listens to OS preference changes in system mode, applies accent colour as `--primary` CSS variable override
+- Anti-FOUC inline `<script>` in layout.tsx — reads localStorage synchronously before React hydrates to prevent flash of wrong theme
+- `suppressHydrationWarning` on `<html>` to avoid React mismatch warnings
+- Globals.css selector swapped from `@media (prefers-color-scheme: light) { :root }` to `[data-theme="light"]`
+- Removed hardcoded `html { color-scheme: dark; }` — ThemeProvider handles this dynamically
+
+**Files created:**
+- `apps/web/hooks/use-theme.ts`
+- `apps/web/components/ThemeProvider.tsx`
+
+**Files modified:**
+- `apps/web/app/layout.tsx`
+- `apps/web/app/providers.tsx`
+- `apps/web/app/globals.css`
+
+**Commit:** `feat(ui): add theme store and provider for light/dark/system mode`
+
+---
+
+### Commit 2: New Colour Palette + Glow Removal
+
+**What was implemented:**
+- Replaced moody dark palette with clean zinc-based tokens:
+  - Dark: Background `#09090b`, Surface `#18181b`, Surface-raised `#27272a`, Foreground `#fafafa`, Muted `#a1a1aa`
+  - Light: Background `#ffffff`, Surface `#f4f4f5`, Card `#ffffff`, Border `#e4e4e7`, Foreground `#09090b`
+- Bumped border-radius from `5px` → `8px` (softer feel)
+- Softened card shadows — `0 1px 2px rgba(0,0,0,0.1)` dark, `0 1px 2px rgba(0,0,0,0.04)` light
+- Removed entirely: `--glow-primary`, `--glow-success`, `--glow-error` variables, `@keyframes pulse-glow`, `@keyframes dash-march`, `.animate-pulse-glow` utility
+- Subtler `fadeInUp`: distance `12px` → `8px`, duration `0.4s` → `0.3s`
+
+**Files modified:**
+- `apps/web/app/globals.css`
+
+**Commit:** `feat(ui): replace colour palette with clean zinc tokens and remove glow effects`
+
+---
+
+### Commit 3: Component Simplification
+
+**What was fixed:**
+- `card.tsx` — removed `glowColor` prop, `borderTop` glow logic, hover lift (`-translate-y-0.5`), hover shadow escalation
+- `button.tsx` — removed `active:scale-[0.97]`, fixed `outline` and `ghost` variants referencing undefined `--accent` → `--muted`
+- `input.tsx` — subtler focus ring (`ring-2` → `ring-1`), added `focus:border-[var(--ring)]`, `bg-transparent` for light/dark compatibility
+- `select.tsx` — same focus/bg changes as input
+
+**Files modified:**
+- `apps/web/components/ui/card.tsx`
+- `apps/web/components/ui/button.tsx`
+- `apps/web/components/ui/input.tsx`
+- `apps/web/components/ui/select.tsx`
+
+**Commit:** `refactor(ui): simplify card, button, input, and select components`
+
+---
+
+### Commit 4: Sidebar Cleanup
+
+**What was fixed:**
+- Replaced gradient background (`linear-gradient(180deg, #0a0a0e, #0c0c12)`) with flat `var(--sidebar)`
+- Removed `boxShadow: "0 0 12px var(--glow-primary)"` on active nav item
+- Removed `<span className="animate-pulse-glow">` pulsing dot element
+- Removed `marginLeft` shift logic (no longer needed without dot)
+- Added clean left border: `borderLeft: isActive ? "2px solid var(--primary)" : "2px solid transparent"`
+- Removed `transform: translateX(2px)` hover effect — background colour change only
+
+**Files modified:**
+- `apps/web/components/layout/Sidebar.tsx`
+
+**Commit:** `refactor(ui): clean sidebar — flat background, simple active indicator`
+
+---
+
+### Commit 5: Page-Level Style Cleanup
+
+**What was fixed:**
+- `KPICards.tsx` — removed `glowColor` from config array and `<Card>` props
+- `upload/page.tsx` — removed drag zone `boxShadow` glow, toned down drag scale (`1.1` → `1.02`), replaced `var(--glow-error)` with static `rgba(239,68,68,0.08)`
+- `subscriptions/page.tsx` — removed `className="animate-pulse-glow"` from active status dot (static green dot now)
+- `TransactionTable.tsx` — fixed `hover:bg-[var(--accent)]` → `hover:bg-[var(--muted)]`
+- `RecentTransactions.tsx` — same `--accent` → `--muted` fix
+
+**Files modified:**
+- `apps/web/components/dashboard/KPICards.tsx`
+- `apps/web/app/upload/page.tsx`
+- `apps/web/app/subscriptions/page.tsx`
+- `apps/web/components/transactions/TransactionTable.tsx`
+- `apps/web/components/dashboard/RecentTransactions.tsx`
+
+**Commit:** `refactor(ui): clean up dashboard, upload, subscriptions, and transactions pages`
+
+---
+
+### Commit 6: Profile API Endpoints + Hook
+
+**What was implemented:**
+- `GET /api/v1/auth/me` — returns `UserRead` of current user, uses existing `get_current_user` dependency (works in single-user mode via default user upsert)
+- `PATCH /api/v1/auth/me` — accepts `UserUpdate` (name, currency), returns updated `UserRead`. Email excluded intentionally (requires verification flow).
+- Frontend `use-profile.ts` hook — `useProfile()` fetch + `useUpdateProfile()` mutation with cache invalidation
+
+**Backend files modified:**
+- `apps/api/app/routes/auth.py`
+
+**Frontend files created:**
+- `apps/web/hooks/use-profile.ts`
+
+**Commit:** `feat(api): add GET/PATCH /auth/me endpoints + frontend profile hook`
+
+---
+
+### Commit 7: Appearance + Profile Settings Tabs
+
+**What was implemented:**
+
+**AppearanceTab:**
+- Theme mode selector — 3 visual cards (Light/Dark/System) with inline SVG icons (sun/moon/monitor)
+- Selected card highlighted with `border-[var(--primary)]` + subtle primary bg tint
+- Accent colour picker — 6 preset circles (Indigo, Blue, Emerald, Rose, Amber, Violet)
+- Selected swatch shows checkmark overlay + ring indicator
+- Both controls call zustand store setters directly — changes apply instantly
+
+**ProfileTab:**
+- Fetches user via `useProfile()` hook
+- Form fields: Name (editable), Email (read-only disabled + note), Currency (select: GBP/USD/EUR/NZD)
+- "Save changes" button with `isPending` loading state and temporary "Saved" success feedback
+- Disabled when no changes detected
+
+**Settings page updated:**
+- Tab order: Appearance, Profile, Categories, Accounts, Import History, Export
+- Default tab changed to `"appearance"`
+- Subtitle updated: "Manage your preferences and account settings"
+
+**Files created:**
+- `apps/web/components/settings/AppearanceTab.tsx`
+- `apps/web/components/settings/ProfileTab.tsx`
+
+**Files modified:**
+- `apps/web/app/settings/page.tsx`
+
+**Commit:** `feat(settings): add Appearance and Profile tabs`
+
+---
+
+### Design Philosophy: Before → After
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Palette | Moody purples/blues (`#0c0c0f`, `#111116`) | Clean zinc (`#09090b`, `#18181b`) |
+| Light mode | OS media query only, untested | Manual toggle, proper `[data-theme]` selector |
+| Glow effects | Everywhere (cards, sidebar, buttons, status dots) | Removed entirely |
+| Card hover | translateY lift + shadow escalation | Static — no hover animation |
+| Sidebar | Gradient + pulsing dot + glow shadow | Flat colour + 2px left border accent |
+| Button active | scale(0.97) | No transform — colour shift only |
+| Border radius | 5px | 8px (softer) |
+| Shadows | Heavy (`rgba(0,0,0,0.4)`) | Subtle (`rgba(0,0,0,0.1)` dark, `0.04` light) |
+| Settings tabs | 4 (Categories, Accounts, Imports, Export) | 6 (+Appearance, +Profile) |
+
+---
+
+## Updated Summary
+
+| Wave | Tasks | Workers | Status |
+|------|-------|---------|--------|
+| 0 | Repo setup + scaffold | Orchestrator | Done |
+| 1 | P0-07 CI pipeline | 1 | Done |
+| 2 | P0-03 + P0-05 + P0-06 (+ P0-09) | 1 (sequential) | Done |
+| 3 | 1A-01 + 1A-02 + 1A-03 | 1 (sequential) | Done |
+| 4 | 1A-06-E ∥ 1A-07-E | 2 (parallel) | Done |
+| 5 | 1B-01 ∥ 1B-04 ∥ 1B-06 ∥ 1C-01 | 4 (parallel) | Done |
+| 6 | 1C-04 ∥ 1C-05 ∥ 1C-09/10 ∥ 1C-11 | 4 (parallel) | Done |
+| 7 | Stubs + 1D-06 ∥ 1D-07 ∥ 1D-08 ∥ 1D-09 | 1 + 4 (parallel) | Done |
+| 8 | 1D-11-E ∥ 1E-04 | 2 (parallel) | Done |
+| 9 | 1E-01-E ∥ 1E-05-E | 2 (parallel) | Done |
+| Ian S2 | CI fixes + V1 backlog | 1 | Done |
+| Ian S3 | Enum fix + UI overhaul + subscription debug | 1 | Done |
+| Ian S4 | Clean theme + settings overhaul | 1 | Done |
+
+**Total commits:** 71
+**Total parser tests:** 49 passing (Amex 7 + HSBC 12 + Monzo 9 + Starling 9 + AI 12)
+**Bank parsers:** 4 (Amex, HSBC, Monzo, Starling)
+**Settings tabs:** 6 (Appearance, Profile, Categories, Accounts, Import History, Export)
+**Alembic migrations:** 8 (001–008)
+**Backend files:** ~50 Python files
+**Frontend files:** ~35 TypeScript/TSX files
+**Theme modes:** Light, Dark, System (with 6 accent colours)
+**Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md, shared-types README.md
