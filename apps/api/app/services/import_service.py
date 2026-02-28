@@ -16,9 +16,17 @@ from app.models.transaction import Transaction
 def detect_format(filename: str, content: str) -> str | None:
     """
     Detect the bank format from the CSV headers or filename.
-    Returns: 'amex' | 'hsbc' | None
+    Returns: 'amex' | 'hsbc' | 'monzo' | 'starling' | None
     """
     first_line = content.split("\n")[0].lower()
+
+    # Monzo: has "Notes and `#tags`" or "Money Out" columns
+    if "notes and" in first_line or "money out" in first_line:
+        return "monzo"
+
+    # Starling: has "Counter Party" and currency-specific amount header
+    if "counter party" in first_line:
+        return "starling"
 
     # Amex: Date,Description,Amount (3 cols, no balance)
     if "date" in first_line and "description" in first_line and "amount" in first_line:
@@ -33,6 +41,10 @@ def detect_format(filename: str, content: str) -> str | None:
 
     # Filename hints as fallback
     fname = filename.lower()
+    if "monzo" in fname:
+        return "monzo"
+    if "starling" in fname:
+        return "starling"
     if "amex" in fname or "american_express" in fname:
         return "amex"
     if "hsbc" in fname:
@@ -78,6 +90,8 @@ async def get_or_create_account(
     provider_map = {
         "amex": ("Amex", "credit_card"),
         "hsbc": ("HSBC", "current"),
+        "monzo": ("Monzo", "current"),
+        "starling": ("Starling", "current"),
     }
     provider, account_type = provider_map.get(bank_format, ("Unknown", "current"))
 
@@ -127,13 +141,13 @@ async def process_import(
     6. Save import record
     7. Return import record (caller triggers Celery tasks)
     """
-    from app.services.parsers import parse_amex_csv, parse_hsbc_csv
+    from app.services.parsers import parse_amex_csv, parse_hsbc_csv, parse_monzo_csv, parse_starling_csv
 
     # Detect format
     bank_format = detect_format(filename, content)
     if bank_format is None:
         raise ValueError(
-            "Could not detect bank format. Supported formats: Amex CSV, HSBC CSV. "
+            "Could not detect bank format. Supported formats: Amex CSV, HSBC CSV, Monzo CSV, Starling CSV. "
             "Make sure the file has the correct headers."
         )
 
@@ -142,6 +156,10 @@ async def process_import(
         rows = parse_amex_csv(content)
     elif bank_format == "hsbc":
         rows = parse_hsbc_csv(content)
+    elif bank_format == "monzo":
+        rows = parse_monzo_csv(content)
+    elif bank_format == "starling":
+        rows = parse_starling_csv(content)
     else:
         raise ValueError(f"No parser for format: {bank_format}")
 
