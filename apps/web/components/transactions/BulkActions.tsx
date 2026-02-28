@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { useBulkCategoryAssign } from "@/hooks/use-transactions";
 import type { CategoryRead } from "@vault/shared-types";
 
@@ -28,14 +29,14 @@ export function BulkActions({
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-[var(--primary)] bg-[var(--primary)]/5 p-3">
+    <div className="flex items-center gap-3 rounded-[var(--radius)] border border-[var(--primary)] bg-[var(--primary-lighter)] p-3">
       <span className="text-sm font-medium">
         {selectedIds.length} selected
       </span>
-      <select
+      <Select
         value={categoryId}
         onChange={(e) => setCategoryId(e.target.value)}
-        className="h-8 rounded-md border border-[var(--border)] bg-[var(--background)] px-2 text-sm"
+        className="h-8 w-48"
       >
         <option value="">Assign category...</option>
         {categories.map((cat) => (
@@ -43,7 +44,7 @@ export function BulkActions({
             {cat.icon} {cat.name}
           </option>
         ))}
-      </select>
+      </Select>
       <Button
         size="sm"
         onClick={handleAssign}

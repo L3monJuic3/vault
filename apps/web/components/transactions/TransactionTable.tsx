@@ -123,16 +123,16 @@ export function TransactionTable() {
                       className="rounded"
                     />
                   </th>
-                  <th className="p-3 text-left text-sm font-medium text-[var(--muted-foreground)]">
+                  <th className="p-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                     Date
                   </th>
-                  <th className="p-3 text-left text-sm font-medium text-[var(--muted-foreground)]">
+                  <th className="p-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                     Description
                   </th>
-                  <th className="p-3 text-left text-sm font-medium text-[var(--muted-foreground)]">
+                  <th className="p-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                     Category
                   </th>
-                  <th className="p-3 text-right text-sm font-medium text-[var(--muted-foreground)]">
+                  <th className="p-3 text-right text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                     Amount
                   </th>
                 </tr>
@@ -161,11 +161,7 @@ export function TransactionTable() {
                   : transactions.map((txn, index) => (
                       <tr
                         key={txn.id}
-                        className="animate-fade-in-up border-b border-[var(--border)] transition-all duration-150 hover:bg-[var(--muted)]"
-                        style={{
-                          animationDelay: `${Math.min(index * 30, 300)}ms`,
-                          position: "relative",
-                        }}
+                        className="border-b border-[var(--border)] transition-colors duration-150 hover:bg-[var(--surface-raised)]"
                       >
                         <td className="p-3">
                           <input
@@ -218,10 +214,9 @@ export function TransactionTable() {
                           )}
                         </td>
                         <td
-                          className={`p-3 text-right text-sm font-medium ${
+                          className={`p-3 text-right text-sm font-medium font-mono tabular-nums ${
                             txn.amount >= 0 ? "text-[var(--success)]" : "text-[var(--destructive)]"
                           }`}
-                          style={{ fontFamily: "var(--font-mono)" }}
                         >
                           {formatCurrency(txn.amount)}
                         </td>

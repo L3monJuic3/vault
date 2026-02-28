@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { TransactionFilter, CategoryRead } from "@vault/shared-types";
 
 interface TransactionFiltersProps {
@@ -34,7 +35,7 @@ export function TransactionFilters({
         }
         className="w-40"
       />
-      <select
+      <Select
         value={filters.category_id || ""}
         onChange={(e) =>
           onFiltersChange({
@@ -42,7 +43,7 @@ export function TransactionFilters({
             category_id: e.target.value || undefined,
           })
         }
-        className="h-10 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm"
+        className="w-44"
       >
         <option value="">All categories</option>
         {categories.map((cat) => (
@@ -50,7 +51,7 @@ export function TransactionFilters({
             {cat.icon} {cat.name}
           </option>
         ))}
-      </select>
+      </Select>
       <Input
         type="number"
         placeholder="Min amount"
