@@ -106,6 +106,58 @@ async def detailed_health(db: AsyncSession = Depends(get_db)):
     }
 
 
+@router.post("/run-subscription-detection")
+async def run_subscription_detection(
+    db: AsyncSession = Depends(get_db),
+):
+    """Manually trigger subscription detection for the default user.
+
+    Useful after migration fixes or when the Celery task failed silently.
+    Runs synchronously (not via Celery) so you get immediate feedback.
+    """
+    from sqlalchemy import select as _select
+
+    from app.ai.subscription_detector import detect_subscriptions
+    from app.models.account import Account
+    from app.models.transaction import Transaction
+    from app.models.user import User
+
+    # Grab first user (single-user V1)
+    user_result = await db.execute(_select(User).limit(1))
+    user = user_result.scalar_one_or_none()
+    if user is None:
+        return {"error": "No users found"}
+
+    # Fetch all transactions
+    result = await db.execute(
+        _select(Transaction)
+        .join(Account, Transaction.account_id == Account.id)
+        .where(Account.user_id == user.id)
+        .order_by(Transaction.date.desc())
+    )
+    transactions = list(result.scalars().all())
+
+    # Run detection
+    groups = await detect_subscriptions(db, user.id, transactions)
+    await db.commit()
+
+    return {
+        "user_id": str(user.id),
+        "transactions_analysed": len(transactions),
+        "subscriptions_created": len(groups),
+        "groups": [
+            {
+                "name": g.name,
+                "type": g.type,
+                "frequency": g.frequency,
+                "estimated_amount": float(g.estimated_amount),
+                "status": g.status,
+            }
+            for g in groups
+        ],
+    }
+
+
 @router.get("/logs")
 async def get_system_logs(
     level: str | None = Query(
