@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, PageWrapper, PageHeader, Button } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   useHealth,
   useLogs,
@@ -20,17 +21,17 @@ function statusColour(status: string) {
   return "var(--destructive)";
 }
 
-function levelColour(level: string) {
+function levelVariant(level: string): "danger" | "warning" | "accent" | "muted" {
   switch (level) {
     case "ERROR":
     case "CRITICAL":
-      return { bg: "var(--destructive-light)", text: "var(--destructive)" };
+      return "danger";
     case "WARNING":
-      return { bg: "var(--warning-light)", text: "var(--warning)" };
+      return "warning";
     case "INFO":
-      return { bg: "var(--primary-light)", text: "var(--primary)" };
+      return "accent";
     default:
-      return { bg: "var(--muted)", text: "var(--foreground-muted)" };
+      return "muted";
   }
 }
 
@@ -54,38 +55,71 @@ function ServiceCard({
   const colour = statusColour(status);
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-2 p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-section-label">{name}</span>
-          <span
-            className="h-2 w-2 rounded-full"
-            style={{ background: colour }}
-          />
-        </div>
+    <div
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-lg)",
+        padding: "14px 16px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 8,
+        }}
+      >
+        <span className="label">{name}</span>
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: colour,
+          }}
+        />
+      </div>
+      <div
+        style={{
+          fontSize: 15,
+          fontWeight: 600,
+          textTransform: "capitalize",
+          color: colour,
+          marginBottom: 4,
+        }}
+      >
+        {status}
+      </div>
+      {service?.latency_ms !== undefined && (
         <div
-          className="text-[15px] font-semibold capitalize"
-          style={{ color: colour }}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--foreground-muted)",
+          }}
         >
-          {status}
+          {service.latency_ms}ms latency
         </div>
-        {service?.latency_ms !== undefined && (
-          <div className="font-mono text-xs text-[var(--foreground-muted)]">
-            {service.latency_ms}ms latency
-          </div>
-        )}
-        {service?.workers !== undefined && (
-          <div className="text-xs text-[var(--foreground-muted)]">
-            {service.workers} worker{service.workers !== 1 ? "s" : ""} active
-          </div>
-        )}
-        {service?.error && (
-          <div className="mt-1 text-xs text-[var(--destructive)]">
-            {service.error}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+      {service?.workers !== undefined && (
+        <div style={{ fontSize: 11, color: "var(--foreground-muted)" }}>
+          {service.workers} worker{service.workers !== 1 ? "s" : ""} active
+        </div>
+      )}
+      {service?.error && (
+        <div
+          style={{
+            fontSize: 11,
+            color: "var(--spending)",
+            marginTop: 4,
+          }}
+        >
+          {service.error}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -100,45 +134,84 @@ function LogRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const { bg, text } = levelColour(log.level);
-
   return (
     <div
-      className={cn(
-        "border-b border-[var(--border)]",
-        log.detail && "cursor-pointer hover:bg-[var(--surface-raised)]",
-      )}
+      style={{
+        borderBottom: "1px solid var(--border)",
+        cursor: log.detail ? "pointer" : "default",
+        transition: "background 0.1s ease",
+      }}
       onClick={log.detail ? onToggle : undefined}
+      onMouseEnter={(e) => {
+        if (log.detail) e.currentTarget.style.background = "var(--surface-raised)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "transparent";
+      }}
     >
-      <div className="grid grid-cols-[60px_60px_1fr_80px] items-center gap-3 px-4 py-2.5">
-        {/* Level badge */}
-        <span
-          className="rounded-[var(--radius-sm)] text-center font-mono text-[11px] font-semibold px-1.5 py-0.5"
-          style={{ color: text, background: bg }}
-        >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "60px 60px 1fr 80px",
+          alignItems: "center",
+          gap: 12,
+          padding: "8px 16px",
+        }}
+      >
+        <Badge variant={levelVariant(log.level)}>
           {log.level}
-        </span>
-
-        {/* Category */}
-        <span className="font-mono text-[11px] text-[var(--foreground-muted)]">
+        </Badge>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--foreground-muted)",
+          }}
+        >
           {log.category}
         </span>
-
-        {/* Message */}
-        <span className="truncate font-mono text-[13px] text-[var(--foreground)]">
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
+            color: "var(--foreground)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           {log.message}
         </span>
-
-        {/* Time */}
-        <span className="text-right font-mono text-[11px] text-[var(--foreground-muted)]">
+        <span
+          style={{
+            textAlign: "right",
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--foreground-muted)",
+          }}
+        >
           {timeSince(log.created_at)}
         </span>
       </div>
 
-      {/* Expanded detail */}
       {expanded && log.detail && (
-        <div className="border-t border-[var(--border)] bg-[var(--surface-raised)] px-4">
-          <pre className="break-all whitespace-pre-wrap py-3 font-mono text-xs text-[var(--foreground-muted)]">
+        <div
+          style={{
+            borderTop: "1px solid var(--border)",
+            background: "var(--surface-raised)",
+            padding: "12px 16px",
+          }}
+        >
+          <pre
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: "var(--foreground-muted)",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-all",
+              lineHeight: "18px",
+            }}
+          >
             {JSON.stringify(log.detail, null, 2)}
           </pre>
         </div>
@@ -169,60 +242,118 @@ export default function DebugPage() {
   const overallColour = statusColour(health?.status ?? "error");
 
   return (
-    <PageWrapper maxWidth="2xl">
-      <PageHeader
-        title="Debug"
-        subtitle="Service health, request logs, and error history"
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      style={{ padding: "32px 32px 48px", maxWidth: 1280, margin: "0 auto" }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          marginBottom: 24,
+          flexWrap: "wrap",
+          gap: 12,
+        }}
       >
-        <Button
-          variant={autoRefresh ? "default" : "outline"}
-          size="sm"
-          onClick={() => setAutoRefresh(!autoRefresh)}
-          className="font-mono text-xs"
-        >
-          {autoRefresh ? "\u25CF LIVE" : "\u25CB PAUSED"}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => testLog.mutate()}
-        >
-          Test log
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-[var(--destructive)]"
-          onClick={() => clearLogs.mutate()}
-        >
-          Clear logs
-        </Button>
-      </PageHeader>
+        <div>
+          <h1
+            style={{
+              fontSize: 24,
+              fontWeight: 600,
+              letterSpacing: "-0.025em",
+              color: "var(--foreground)",
+              lineHeight: "32px",
+            }}
+          >
+            Debug
+          </h1>
+          <p style={{ fontSize: 13, color: "var(--foreground-muted)", marginTop: 4 }}>
+            Service health, request logs, and error history
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          <Button
+            variant={autoRefresh ? "default" : "outline"}
+            size="sm"
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}
+          >
+            {autoRefresh ? "\u25CF LIVE" : "\u25CB PAUSED"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => testLog.mutate()}>
+            Test log
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => clearLogs.mutate()}
+            style={{ color: "var(--spending)" }}
+          >
+            Clear logs
+          </Button>
+        </div>
+      </div>
 
       {/* Overall status banner */}
       <div
-        className="mb-5 flex items-center gap-2.5 rounded-[var(--radius)] bg-[var(--surface)] px-4 py-3"
-        style={{ borderColor: overallColour, borderWidth: "1px", borderStyle: "solid" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 20,
+          padding: "10px 16px",
+          borderRadius: "var(--radius)",
+          background: "var(--surface)",
+          border: `1px solid ${overallColour}`,
+        }}
       >
         <span
-          className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-          style={{ background: overallColour }}
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: overallColour,
+            flexShrink: 0,
+          }}
         />
         <span
-          className="text-sm font-semibold capitalize"
-          style={{ color: overallColour }}
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            textTransform: "capitalize",
+            color: overallColour,
+          }}
         >
           {healthLoading ? "Checking\u2026" : `System ${health?.status ?? "unknown"}`}
         </span>
         {health?.timestamp && (
-          <span className="ml-auto font-mono text-xs text-[var(--foreground-muted)]">
+          <span
+            style={{
+              marginLeft: "auto",
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--foreground-muted)",
+            }}
+          >
             Last checked {timeSince(health.timestamp)}
           </span>
         )}
       </div>
 
       {/* Service cards */}
-      <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 12,
+          marginBottom: 28,
+        }}
+        className="max-lg:grid-cols-2"
+      >
         <ServiceCard name="Database" service={health?.services.database} />
         <ServiceCard name="Redis" service={health?.services.redis} />
         <ServiceCard name="Celery Worker" service={health?.services.celery} />
@@ -231,54 +362,74 @@ export default function DebugPage() {
 
       {/* Log counts strip */}
       {logsData?.counts && (
-        <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 12,
+          }}
+        >
           {(["ERROR", "WARNING", "INFO", "DEBUG"] as const).map((lvl) => {
             const count = logsData.counts[lvl] ?? 0;
             if (!count) return null;
             const active = levelFilter === lvl;
-            const { bg, text } = levelColour(lvl);
             return (
               <button
                 key={lvl}
-                onClick={() =>
-                  setLevelFilter(active ? "ALL" : lvl)
-                }
-                className={cn(
-                  "rounded-[var(--radius-sm)] border px-2.5 py-1 font-mono text-xs transition-colors duration-150 cursor-pointer",
-                  active
-                    ? "font-medium"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-muted)]",
-                )}
-                style={
-                  active
-                    ? { background: bg, color: text, borderColor: text }
-                    : undefined
-                }
+                onClick={() => setLevelFilter(active ? "ALL" : lvl)}
+                style={{
+                  padding: "4px 10px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  fontWeight: active ? 500 : 400,
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid",
+                  cursor: "pointer",
+                  transition: "all 0.12s ease",
+                  borderColor: active ? "var(--accent)" : "var(--border)",
+                  background: active ? "var(--accent-muted)" : "var(--surface)",
+                  color: active ? "var(--accent)" : "var(--foreground-muted)",
+                }}
               >
                 {lvl} · {count}
               </button>
             );
           })}
-          <span className="ml-auto font-mono text-xs text-[var(--foreground-muted)]">
+          <span
+            style={{
+              marginLeft: "auto",
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--foreground-muted)",
+            }}
+          >
             {logsData.total} total
           </span>
         </div>
       )}
 
       {/* Category filter */}
-      <div className="mb-3 flex flex-wrap gap-1.5">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
         {LOG_CATEGORIES.map((cat) => {
           const active = categoryFilter === cat;
           return (
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
-              className={cn(
-                "rounded-[var(--radius-sm)] border px-2 py-1 font-mono text-[11px] transition-colors duration-150 cursor-pointer",
-                active
-                  ? "border-[var(--primary)] bg-[var(--primary-lighter)] text-[var(--primary)]"
-                  : "border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]",
-              )}
+              style={{
+                padding: "4px 8px",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                borderRadius: "var(--radius-sm)",
+                border: "1px solid",
+                cursor: "pointer",
+                transition: "all 0.12s ease",
+                borderColor: active ? "var(--accent)" : "transparent",
+                background: active ? "var(--accent-glow)" : "transparent",
+                color: active ? "var(--accent)" : "var(--foreground-muted)",
+              }}
             >
               {cat}
             </button>
@@ -287,51 +438,86 @@ export default function DebugPage() {
       </div>
 
       {/* Log table */}
-      <Card>
-        <CardContent className="overflow-hidden p-0">
-          {/* Table header */}
-          <div className="grid grid-cols-[60px_60px_1fr_80px] gap-3 border-b border-[var(--border)] bg-[var(--surface-raised)] px-4 py-2">
-            {["LEVEL", "CAT", "MESSAGE", "TIME"].map((h) => (
-              <span
-                key={h}
-                className="font-mono text-[11px] font-semibold tracking-wide text-[var(--foreground-subtle)]"
-              >
-                {h}
-              </span>
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Table header */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "60px 60px 1fr 80px",
+            gap: 12,
+            padding: "8px 16px",
+            borderBottom: "1px solid var(--border)",
+            background: "var(--surface-raised)",
+          }}
+        >
+          {["LEVEL", "CAT", "MESSAGE", "TIME"].map((h) => (
+            <span
+              key={h}
+              className="label"
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+
+        {/* Rows */}
+        {logsLoading ? (
+          <div
+            style={{
+              padding: "40px 0",
+              textAlign: "center",
+              fontSize: 13,
+              color: "var(--foreground-muted)",
+            }}
+          >
+            Loading logs...
+          </div>
+        ) : !logsData?.logs.length ? (
+          <div
+            style={{
+              padding: "40px 0",
+              textAlign: "center",
+              fontSize: 13,
+              color: "var(--foreground-muted)",
+            }}
+          >
+            No logs yet. Hit &ldquo;Test log&rdquo; to verify the pipeline is working.
+          </div>
+        ) : (
+          <div style={{ maxHeight: 600, overflowY: "auto" }}>
+            {logsData.logs.map((log) => (
+              <LogRow
+                key={log.id}
+                log={log}
+                expanded={expandedId === log.id}
+                onToggle={() =>
+                  setExpandedId(expandedId === log.id ? null : log.id)
+                }
+              />
             ))}
           </div>
-
-          {/* Rows */}
-          {logsLoading ? (
-            <div className="py-8 text-center text-[13px] text-[var(--foreground-muted)]">
-              Loading logs...
-            </div>
-          ) : !logsData?.logs.length ? (
-            <div className="py-8 text-center text-[13px] text-[var(--foreground-muted)]">
-              No logs yet. Hit &ldquo;Test log&rdquo; to verify the pipeline is working.
-            </div>
-          ) : (
-            <div className="max-h-[600px] overflow-y-auto">
-              {logsData.logs.map((log) => (
-                <LogRow
-                  key={log.id}
-                  log={log}
-                  expanded={expandedId === log.id}
-                  onToggle={() =>
-                    setExpandedId(expandedId === log.id ? null : log.id)
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       {/* Footer note */}
-      <p className="mt-3 font-mono text-xs text-[var(--foreground-subtle)]">
+      <p
+        style={{
+          marginTop: 12,
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          color: "var(--foreground-muted)",
+        }}
+      >
         Click any log row to expand full detail and traceback. Logs auto-refresh
         every 5s when live mode is on.
       </p>
-    </PageWrapper>
+    </motion.div>
   );
 }
