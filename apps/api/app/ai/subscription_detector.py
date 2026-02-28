@@ -138,7 +138,7 @@ async def detect_subscriptions(
 
         # Mark transactions as recurring
         for txn in txns:
-            txn.is_recurring = True
+            txn.is_recurring = True  # type: ignore[assignment]
             txn.recurring_group_id = group.id
 
     await db.flush()
