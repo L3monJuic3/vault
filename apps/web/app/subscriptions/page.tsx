@@ -10,6 +10,19 @@ import { useCountUp } from "@/hooks/use-count-up";
 import { useSubscriptions, useDismissSubscription } from "@/hooks/use-subscriptions";
 import type { RecurringGroupRead } from "@vault/shared-types";
 
+function safeOpen(url: string): void {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      console.warn("Blocked unsafe cancel_url protocol:", parsed.protocol);
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  } catch {
+    console.warn("Blocked invalid cancel_url:", url);
+  }
+}
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
 }
@@ -152,7 +165,7 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
             variant="outline"
             size="sm"
             type="button"
-            onClick={() => window.open(sub.cancel_url!, "_blank", "noopener,noreferrer")}
+            onClick={() => safeOpen(sub.cancel_url!)}
           >
             Cancel
           </Button>

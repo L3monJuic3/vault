@@ -17,7 +17,7 @@ services:
       DATABASE_URL_SYNC: ${DATABASE_URL_SYNC}
       REDIS_URL: redis://redis:6379/0
       JWT_SECRET: ${JWT_SECRET}
-      AUTH_REQUIRED: ${AUTH_REQUIRED:-false}
+      AUTH_REQUIRED: ${AUTH_REQUIRED:-true}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://vault.local}
       APP_ENV: production
