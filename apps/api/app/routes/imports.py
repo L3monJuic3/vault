@@ -19,6 +19,21 @@ router = APIRouter(prefix="/api/v1/imports", tags=["imports"])
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 
 
+async def _read_limited(file: UploadFile, max_bytes: int) -> bytes:
+    """Read an uploaded file in chunks, rejecting files that exceed max_bytes."""
+    chunks: list[bytes] = []
+    total = 0
+    while chunk := await file.read(65536):
+        total += len(chunk)
+        if total > max_bytes:
+            raise HTTPException(
+                status_code=413,
+                detail="File too large. Maximum allowed size is 5MB.",
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
 @router.post("/upload", response_model=ImportRead, status_code=status.HTTP_201_CREATED)
 async def upload_statement(
     file: UploadFile = File(...),
@@ -33,13 +48,8 @@ async def upload_statement(
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
 
-    # Read content
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_BYTES:
-        raise HTTPException(
-            status_code=413,
-            detail="File too large. Maximum allowed size is 5MB.",
-        )
+    # Read content with streaming size check
+    raw = await _read_limited(file, MAX_UPLOAD_BYTES)
     try:
         content = raw.decode("utf-8")
     except UnicodeDecodeError:

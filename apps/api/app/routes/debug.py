@@ -1,3 +1,4 @@
+import asyncio
 import time
 from datetime import datetime, timezone
 
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.config import settings
+from app.middleware.auth import get_current_user
 from app.services.log_service import get_logs, get_log_counts, write_log
 
 
@@ -19,7 +21,7 @@ async def require_debug_mode() -> None:
 router = APIRouter(
     prefix="/api/v1/debug",
     tags=["debug"],
-    dependencies=[Depends(require_debug_mode)],
+    dependencies=[Depends(require_debug_mode), Depends(get_current_user)],
 )
 
 
@@ -71,7 +73,7 @@ async def detailed_health(db: AsyncSession = Depends(get_db)):
         from app.tasks.celery_app import celery_app
 
         inspect = celery_app.control.inspect(timeout=2)
-        active = inspect.ping()
+        active = await asyncio.to_thread(inspect.ping)
         if active:
             worker_count = len(active)
             services["celery"] = {
