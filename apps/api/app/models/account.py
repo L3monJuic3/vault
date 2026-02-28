@@ -24,8 +24,8 @@ class Account(Base, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
     name = Column(String, nullable=False)
-    type = Column(Enum(AccountType), nullable=False)
+    type: Column[AccountType] = Column(Enum(AccountType), nullable=False)
     provider = Column(String, nullable=False)
     currency = Column(String(3), nullable=False, default="GBP")
-    current_balance = Column(DECIMAL(12, 2), nullable=False, default=0)
+    current_balance: Column[DECIMAL] = Column(DECIMAL(12, 2), nullable=False, default=0)
     is_active = Column(Boolean, nullable=False, default=True)

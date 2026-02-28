@@ -51,7 +51,7 @@ async def dismiss_subscription(
     sub = await get_subscription_by_id(db, subscription_id, user_id)
     if sub is None:
         return None
-    sub.status = RecurringStatus.cancelled
+    sub.status = RecurringStatus.cancelled  # type: ignore[assignment]
     await db.flush()
     return sub
 
@@ -76,12 +76,12 @@ async def get_monthly_total(db: AsyncSession, user_id: UUID) -> Decimal:
     for sub in subscriptions:
         amount = sub.estimated_amount or Decimal("0")
         if sub.frequency == Frequency.weekly:
-            total += amount * 52 / 12
+            total += amount * 52 / 12  # type: ignore[assignment]
         elif sub.frequency == Frequency.monthly:
-            total += amount
+            total += amount  # type: ignore[assignment]
         elif sub.frequency == Frequency.quarterly:
-            total += amount / 3
+            total += amount / 3  # type: ignore[assignment]
         elif sub.frequency == Frequency.annual:
-            total += amount / 12
+            total += amount / 12  # type: ignore[assignment]
 
     return total.quantize(Decimal("0.01"))
