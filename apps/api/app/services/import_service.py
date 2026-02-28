@@ -28,16 +28,18 @@ def detect_format(filename: str, content: str) -> str | None:
     if "counter party" in first_line:
         return "starling"
 
-    # Amex: Date,Description,Amount (3 cols, no balance)
-    if "date" in first_line and "description" in first_line and "amount" in first_line:
-        if "paid out" not in first_line and "paid in" not in first_line:
-            return "amex"
-
-    # HSBC: Date,Description,Paid Out,Paid In,Balance  OR  Date,Description,Amount,Balance
+    # HSBC: check BEFORE Amex — "balance" column distinguishes HSBC from Amex
+    # Covers both HSBC formats:
+    #   Date,Description,Paid Out,Paid In,Balance
+    #   Date,Description,Amount,Balance
     if "paid out" in first_line or "paid in" in first_line:
         return "hsbc"
     if "balance" in first_line and "date" in first_line:
         return "hsbc"
+
+    # Amex: Date,Description,Amount (no balance, no paid out/in)
+    if "date" in first_line and "description" in first_line and "amount" in first_line:
+        return "amex"
 
     # Filename hints as fallback
     fname = filename.lower()

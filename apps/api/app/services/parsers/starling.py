@@ -18,7 +18,7 @@ def parse_starling_csv(file_content: str) -> list[dict]:
     reader = csv.DictReader(io.StringIO(file_content))
 
     for row in reader:
-        date_str = row.get("Date", "").strip()
+        date_str = (row.get("Date") or "").strip()
         if not date_str:
             continue
 
@@ -44,8 +44,8 @@ def parse_starling_csv(file_content: str) -> list[dict]:
             continue
 
         # Counter Party is the merchant name
-        counter_party = row.get("Counter Party", "").strip()
-        reference = row.get("Reference", "").strip()
+        counter_party = (row.get("Counter Party") or "").strip()
+        reference = (row.get("Reference") or "").strip()
 
         # Use reference as description, counter party as merchant
         description = reference or counter_party
