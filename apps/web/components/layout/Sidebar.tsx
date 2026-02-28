@@ -130,7 +130,7 @@ function NavItem({
   pathname: string;
 }) {
   const isActive =
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 
   return (
     <Link

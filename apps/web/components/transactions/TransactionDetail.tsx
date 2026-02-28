@@ -13,10 +13,10 @@ interface TransactionDetailProps {
   categories: CategoryRead[];
 }
 
-function formatCurrency(amount: number): string {
+function formatCurrency(amount: number, currency: string = "GBP"): string {
   return new Intl.NumberFormat("en-GB", {
     style: "currency",
-    currency: "GBP",
+    currency,
   }).format(amount);
 }
 

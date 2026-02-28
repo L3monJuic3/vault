@@ -10,7 +10,10 @@ function resolveTheme(mode: string): "light" | "dark" {
       ? "dark"
       : "light";
   }
-  return mode as "light" | "dark";
+  if (mode === "light" || mode === "dark") {
+    return mode;
+  }
+  return "dark"; // safe fallback for unknown/invalid stored values
 }
 
 /**
