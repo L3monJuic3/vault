@@ -54,7 +54,7 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
             detail="Invalid email or password",
         )
 
-    token = create_access_token(user.id)
+    token = create_access_token(user.id)  # type: ignore[arg-type]
     return {"access_token": token, "token_type": "bearer"}
 
 

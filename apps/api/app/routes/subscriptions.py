@@ -22,8 +22,8 @@ async def list_subscriptions(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    subs = await get_subscriptions(db, user.id)
-    monthly_total = await get_monthly_total(db, user.id)
+    subs = await get_subscriptions(db, user.id)  # type: ignore[arg-type]
+    monthly_total = await get_monthly_total(db, user.id)  # type: ignore[arg-type]
     return {
         "items": [RecurringGroupRead.model_validate(s) for s in subs],
         "monthly_total": float(monthly_total),
@@ -40,7 +40,7 @@ async def update_sub(
     sub = await update_subscription(
         db,
         subscription_id,
-        user.id,
+        user.id,  # type: ignore[arg-type]
         **update_data.model_dump(exclude_none=True),
     )
     if sub is None:
@@ -54,7 +54,7 @@ async def dismiss_sub(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    sub = await dismiss_subscription(db, subscription_id, user.id)
+    sub = await dismiss_subscription(db, subscription_id, user.id)  # type: ignore[arg-type]
     if sub is None:
         raise HTTPException(status_code=404, detail="Subscription not found")
     return RecurringGroupRead.model_validate(sub)
