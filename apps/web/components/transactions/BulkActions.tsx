@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import { useBulkCategoryAssign } from "@/hooks/use-transactions";
 import type { CategoryRead } from "@vault/shared-types";
 
@@ -29,14 +28,41 @@ export function BulkActions({
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-[var(--radius)] border border-[var(--primary)] bg-[var(--primary-lighter)] p-3">
-      <span className="text-sm font-medium">
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "10px 14px",
+        borderRadius: "var(--radius)",
+        border: "1px solid var(--border-accent)",
+        background: "var(--accent-glow)",
+      }}
+    >
+      <span
+        style={{
+          fontSize: 13,
+          fontWeight: 500,
+          color: "var(--foreground)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
         {selectedIds.length} selected
       </span>
-      <Select
+      <select
         value={categoryId}
         onChange={(e) => setCategoryId(e.target.value)}
-        className="h-8 w-48"
+        style={{
+          height: 32,
+          padding: "0 10px",
+          fontSize: 13,
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius)",
+          color: "var(--foreground)",
+          outline: "none",
+          width: 180,
+        }}
       >
         <option value="">Assign category...</option>
         {categories.map((cat) => (
@@ -44,7 +70,7 @@ export function BulkActions({
             {cat.icon} {cat.name}
           </option>
         ))}
-      </Select>
+      </select>
       <Button
         size="sm"
         onClick={handleAssign}

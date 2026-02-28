@@ -1,7 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import type { TransactionFilter, CategoryRead } from "@vault/shared-types";
 
 interface TransactionFiltersProps {
@@ -10,32 +8,46 @@ interface TransactionFiltersProps {
   categories: CategoryRead[];
 }
 
+const inputStyle: React.CSSProperties = {
+  height: 34,
+  padding: "0 10px",
+  fontSize: 13,
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
+  borderRadius: "var(--radius)",
+  color: "var(--foreground)",
+  outline: "none",
+  transition: "border-color 0.12s ease",
+};
+
 export function TransactionFilters({
   filters,
   onFiltersChange,
   categories,
 }: TransactionFiltersProps) {
   return (
-    <div className="flex flex-wrap gap-3">
-      <Input
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      <input
         type="date"
-        placeholder="From"
         value={filters.date_from || ""}
         onChange={(e) =>
           onFiltersChange({ ...filters, date_from: e.target.value || undefined })
         }
-        className="w-40"
+        style={{ ...inputStyle, width: 150 }}
+        onFocus={(e) => { e.target.style.borderColor = "var(--accent)"; }}
+        onBlur={(e) => { e.target.style.borderColor = "var(--border)"; }}
       />
-      <Input
+      <input
         type="date"
-        placeholder="To"
         value={filters.date_to || ""}
         onChange={(e) =>
           onFiltersChange({ ...filters, date_to: e.target.value || undefined })
         }
-        className="w-40"
+        style={{ ...inputStyle, width: 150 }}
+        onFocus={(e) => { e.target.style.borderColor = "var(--accent)"; }}
+        onBlur={(e) => { e.target.style.borderColor = "var(--border)"; }}
       />
-      <Select
+      <select
         value={filters.category_id || ""}
         onChange={(e) =>
           onFiltersChange({
@@ -43,7 +55,7 @@ export function TransactionFilters({
             category_id: e.target.value || undefined,
           })
         }
-        className="w-44"
+        style={{ ...inputStyle, width: 170 }}
       >
         <option value="">All categories</option>
         {categories.map((cat) => (
@@ -51,10 +63,10 @@ export function TransactionFilters({
             {cat.icon} {cat.name}
           </option>
         ))}
-      </Select>
-      <Input
+      </select>
+      <input
         type="number"
-        placeholder="Min amount"
+        placeholder="Min £"
         value={filters.amount_min ?? ""}
         onChange={(e) =>
           onFiltersChange({
@@ -62,11 +74,13 @@ export function TransactionFilters({
             amount_min: e.target.value ? Number(e.target.value) : undefined,
           })
         }
-        className="w-32"
+        style={{ ...inputStyle, width: 100, fontFamily: "var(--font-mono)", fontSize: 12 }}
+        onFocus={(e) => { e.target.style.borderColor = "var(--accent)"; }}
+        onBlur={(e) => { e.target.style.borderColor = "var(--border)"; }}
       />
-      <Input
+      <input
         type="number"
-        placeholder="Max amount"
+        placeholder="Max £"
         value={filters.amount_max ?? ""}
         onChange={(e) =>
           onFiltersChange({
@@ -74,7 +88,9 @@ export function TransactionFilters({
             amount_max: e.target.value ? Number(e.target.value) : undefined,
           })
         }
-        className="w-32"
+        style={{ ...inputStyle, width: 100, fontFamily: "var(--font-mono)", fontSize: 12 }}
+        onFocus={(e) => { e.target.style.borderColor = "var(--accent)"; }}
+        onBlur={(e) => { e.target.style.borderColor = "var(--border)"; }}
       />
     </div>
   );
