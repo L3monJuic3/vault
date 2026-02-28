@@ -6,3 +6,4 @@ export { Select } from "./select";
 export { Input } from "./input";
 export { PageHeader } from "./page-header";
 export { PageWrapper } from "./page-wrapper";
+export { EmptyState } from "./EmptyState";

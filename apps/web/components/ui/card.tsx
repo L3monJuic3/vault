@@ -2,19 +2,96 @@ import { cn } from "@/lib/utils";
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  interactive?: boolean;
+  variant?: "default" | "elevated" | "accent" | "glass";
+  padding?: "none" | "sm" | "md" | "lg";
+  hover?: boolean;
+  interactive?: boolean; // backward compat alias for hover
 }
 
-export function Card({ className, children, interactive, ...props }: CardProps) {
+const paddingMap = {
+  none: "0",
+  sm: "var(--space-3)",
+  md: "var(--space-5)",
+  lg: "var(--space-6)",
+};
+
+export function Card({
+  className,
+  children,
+  variant = "default",
+  padding = "md",
+  hover,
+  interactive,
+  style,
+  onClick,
+  ...props
+}: CardProps) {
+  const isHoverable = hover ?? interactive;
+
+  const variantStyles: React.CSSProperties = {
+    default: {
+      background: "var(--surface)",
+      border: "1px solid var(--border)",
+      borderRadius: "var(--radius-lg)",
+    },
+    elevated: {
+      background: "var(--surface-raised)",
+      border: "1px solid var(--border)",
+      borderRadius: "var(--radius-lg)",
+      boxShadow: "var(--shadow-sm)",
+    },
+    accent: {
+      background: "var(--surface)",
+      border: "1px solid var(--border)",
+      borderLeft: "2px solid var(--accent)",
+      borderRadius: "var(--radius-lg)",
+    },
+    glass: {
+      background: "rgba(17, 17, 20, 0.8)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
+      border: "1px solid var(--border)",
+      borderRadius: "var(--radius-lg)",
+    },
+  }[variant];
+
   return (
     <div
       className={cn(
-        "rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card)] text-[var(--card-foreground)]",
-        "shadow-[var(--card-shadow)] transition-all duration-200 ease-out",
-        interactive &&
-          "cursor-pointer hover:shadow-[var(--card-shadow-hover)] hover:border-[var(--foreground-subtle)]/30",
+        "transition-all duration-150 ease-out",
+        isHoverable && "cursor-pointer",
         className,
       )}
+      style={{
+        ...variantStyles,
+        padding: paddingMap[padding],
+        ...(isHoverable
+          ? { transition: "all 0.15s ease" }
+          : {}),
+        ...style,
+      }}
+      onMouseEnter={
+        isHoverable
+          ? (e) => {
+              const el = e.currentTarget;
+              el.style.borderColor = "var(--border-hover)";
+              el.style.transform = "translateY(-1px)";
+              el.style.boxShadow = "var(--shadow-sm)";
+            }
+          : undefined
+      }
+      onMouseLeave={
+        isHoverable
+          ? (e) => {
+              const el = e.currentTarget;
+              el.style.borderColor = "";
+              el.style.transform = "";
+              el.style.boxShadow =
+                variant === "elevated" ? "var(--shadow-sm)" : "";
+            }
+          : undefined
+      }
+      onClick={onClick}
       {...props}
     >
       {children}
@@ -42,7 +119,7 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        "text-sm font-semibold leading-none tracking-tight",
+        "text-sm font-medium leading-none tracking-tight",
         className,
       )}
       {...props}
