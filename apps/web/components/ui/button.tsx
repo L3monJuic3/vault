@@ -6,10 +6,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  default: "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90",
-  secondary: "bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:opacity-80",
-  outline: "border border-[var(--border)] bg-transparent hover:bg-[var(--accent)]",
-  ghost: "hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
+  default:
+    "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90",
+  secondary:
+    "bg-[var(--muted)] text-[var(--foreground)] hover:opacity-80",
+  outline:
+    "border border-[var(--border)] bg-transparent hover:bg-[var(--muted)]",
+  ghost: "hover:bg-[var(--muted)]",
   destructive: "bg-[var(--destructive)] text-white hover:opacity-90",
 };
 
@@ -29,11 +32,12 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50",
-        "active:scale-[0.97]",
+        "inline-flex items-center justify-center rounded-md font-medium transition-colors duration-150",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+        "disabled:pointer-events-none disabled:opacity-50",
         variants[variant],
         sizes[size],
-        className
+        className,
       )}
       {...props}
     />
