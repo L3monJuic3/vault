@@ -67,7 +67,7 @@ export function RecentTransactions() {
               {transactions.map((txn) => (
                 <div
                   key={txn.id}
-                  className="flex items-center justify-between rounded-md px-2 py-2.5 transition-colors hover:bg-[var(--muted)]"
+                  className="flex items-center justify-between rounded-[var(--radius)] px-2.5 py-2.5 transition-all duration-150 hover:bg-[var(--surface-raised)] hover:pl-3.5"
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
                     <span className="shrink-0 text-xs text-[var(--muted-foreground)]">
@@ -78,7 +78,7 @@ export function RecentTransactions() {
                     </span>
                   </div>
                   <span
-                    className={`shrink-0 text-sm font-medium ${
+                    className={`shrink-0 font-mono text-sm font-medium tabular-nums ${
                       txn.amount >= 0
                         ? "text-[var(--success)]"
                         : "text-[var(--foreground)]"
