@@ -57,41 +57,35 @@
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
-/* Light mode override (secondary, but supported) */
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #f8f8fc;
-    --surface: #ffffff;
-    --surface-raised: #f1f1f7;
-    --foreground: #0c0c0f;
-    --foreground-muted: #6b7280;
-    --foreground-subtle: #d1d5db;
+/* Light mode — toggled via data-theme attribute */
+[data-theme="light"] {
+  --background: #f8f8fc;
+  --surface: #ffffff;
+  --surface-raised: #f1f1f7;
+  --foreground: #0c0c0f;
+  --foreground-muted: #6b7280;
+  --foreground-subtle: #d1d5db;
 
-    --card: #ffffff;
-    --card-foreground: #0c0c0f;
-    --card-border: #e5e5ef;
+  --card: #ffffff;
+  --card-foreground: #0c0c0f;
+  --card-border: #e5e5ef;
 
-    --sidebar: #ffffff;
-    --sidebar-border: #e5e5ef;
-    --sidebar-item-hover: #f4f4f9;
-    --sidebar-item-active: #eeeef8;
-    --sidebar-item-active-border: #6366f1;
+  --sidebar: #ffffff;
+  --sidebar-border: #e5e5ef;
+  --sidebar-item-hover: #f4f4f9;
+  --sidebar-item-active: #eeeef8;
+  --sidebar-item-active-border: #6366f1;
 
-    --border: #e5e5ef;
-    --border-subtle: #f0f0f7;
-    --muted: #f4f4f9;
-    --muted-foreground: #9ca3af;
-  }
+  --border: #e5e5ef;
+  --border-subtle: #f0f0f7;
+  --muted: #f4f4f9;
+  --muted-foreground: #9ca3af;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-html {
-  color-scheme: dark;
 }
 
 body {

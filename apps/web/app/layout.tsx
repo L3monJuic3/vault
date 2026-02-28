@@ -14,7 +14,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=JSON.parse(localStorage.getItem('vault-theme')||'{}');var m=(s.state||{}).mode||'system';var t=m;if(m==='system'){t=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;var a=(s.state||{}).accent;if(a){document.documentElement.style.setProperty('--primary',a)}}catch(e){document.documentElement.setAttribute('data-theme','dark')}})();`,
+          }}
+        />
+      </head>
       <body>
         <Providers>
           <div
