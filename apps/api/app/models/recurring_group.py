@@ -16,9 +16,11 @@ class RecurringType(str, enum.Enum):
 
 class Frequency(str, enum.Enum):
     weekly = "weekly"
+    fortnightly = "fortnightly"
     monthly = "monthly"
     quarterly = "quarterly"
     annual = "annual"
+    yearly = "yearly"
 
 
 class RecurringStatus(str, enum.Enum):
