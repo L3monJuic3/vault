@@ -26,9 +26,10 @@ function UploadProgress() {
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 90) return prev + 0.5;
-        if (prev >= 70) return prev + 1;
-        return prev + 3;
+        if (prev >= 95) return prev; // no-op, prevents re-render
+        if (prev >= 90) return Math.min(prev + 0.5, 95);
+        if (prev >= 70) return Math.min(prev + 1, 95);
+        return Math.min(prev + 3, 95);
       });
     }, 60);
     return () => clearInterval(interval);

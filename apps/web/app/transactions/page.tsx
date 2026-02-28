@@ -24,7 +24,7 @@ export default function TransactionsPage() {
         >
           Transactions
         </h1>
-        <p style={{ fontSize: 13, color: "var(--foreground-muted)", marginTop: 4 }}>
+        <p style={{ fontSize: 13, color: "var(--muted-foreground)", marginTop: 4 }}>
           View, search, and manage your transactions
         </p>
       </div>

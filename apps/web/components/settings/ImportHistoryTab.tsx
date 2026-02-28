@@ -26,7 +26,22 @@ function formatDateRange(imp: ImportRead): string {
 }
 
 export function ImportHistoryTab() {
-  const { data: imports, isLoading } = useImports();
+  const { data: imports, isLoading, error } = useImports();
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Import History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Failed to load import history. Please try again.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return (

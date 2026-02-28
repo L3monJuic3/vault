@@ -8,7 +8,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html>
+    <html lang="en">
       <body style={{ padding: 40, fontFamily: "monospace", background: "#111", color: "#eee" }}>
         <h1 style={{ color: "#f87171" }}>Application Error</h1>
         {process.env.NODE_ENV === "development" ? (
