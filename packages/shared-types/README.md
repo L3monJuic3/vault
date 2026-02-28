@@ -23,7 +23,6 @@ pnpm generate:types
 
 1. The FastAPI backend must be running (`cd apps/api && uvicorn app.main:app --reload`)
 2. `pnpm install` must have been run in this package (installs `openapi-typescript`)
-3. `curl` must be available (used to fetch the OpenAPI schema)
 
 ### What gets generated
 

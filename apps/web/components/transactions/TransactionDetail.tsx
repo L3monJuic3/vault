@@ -100,7 +100,7 @@ export function TransactionDetail({
           inset: 0,
           background: "rgba(0, 0, 0, 0.5)",
           zIndex: 40,
-          animation: "fadeIn 0.15s ease",
+          animation: "fade-in 0.15s ease",
         }}
       />
 
@@ -118,7 +118,7 @@ export function TransactionDetail({
           zIndex: 50,
           display: "flex",
           flexDirection: "column",
-          animation: "slideInRight 0.2s var(--transition-snappy)",
+          animation: "slide-in-right 0.2s var(--transition-snappy)",
           boxShadow: "-8px 0 30px rgba(0, 0, 0, 0.3)",
         }}
       >
