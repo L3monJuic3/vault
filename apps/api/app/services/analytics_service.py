@@ -56,6 +56,7 @@ async def get_dashboard_stats(db: AsyncSession, user_id: UUID) -> dict:
     sub_query = select(RecurringGroup).where(
         RecurringGroup.user_id == user_id,
         RecurringGroup.status == "active",
+        RecurringGroup.type == "subscription",
     )
     sub_result = await db.execute(sub_query)
     subscriptions = sub_result.scalars().all()
@@ -65,11 +66,13 @@ async def get_dashboard_stats(db: AsyncSession, user_id: UUID) -> dict:
         amount = sub.estimated_amount or Decimal("0")
         if sub.frequency == "weekly":
             subscription_total += amount * 52 / 12  # type: ignore[assignment]
+        elif sub.frequency == "fortnightly":
+            subscription_total += amount * 26 / 12  # type: ignore[assignment]
         elif sub.frequency == "monthly":
             subscription_total += amount  # type: ignore[assignment]
         elif sub.frequency == "quarterly":
             subscription_total += amount / 3  # type: ignore[assignment]
-        elif sub.frequency == "annual":
+        elif sub.frequency in ("annual", "yearly"):
             subscription_total += amount / 12  # type: ignore[assignment]
 
     return {

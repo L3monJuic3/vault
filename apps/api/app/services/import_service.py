@@ -58,7 +58,13 @@ def detect_format(filename: str, content: str) -> str | None:
 
 def _txn_hash(account_id: uuid.UUID, date: Any, amount: Any, description: str) -> str:
     """Stable hash for duplicate detection: account + date + amount + description."""
-    key = f"{account_id}|{date.date() if hasattr(date, 'date') else date}|{amount}|{description.strip().lower()}"
+    from decimal import Decimal, InvalidOperation
+
+    try:
+        normalised_amount = str(Decimal(str(amount)).normalize())
+    except InvalidOperation:
+        normalised_amount = str(amount)
+    key = f"{account_id}|{date.date() if hasattr(date, 'date') else date}|{normalised_amount}|{description.strip().lower()}"
     return hashlib.sha256(key.encode()).hexdigest()
 
 
@@ -101,8 +107,9 @@ async def get_or_create_account(
         .where(Account.user_id == user_id)
         .where(Account.provider == provider)
         .where(Account.is_active == True)  # noqa: E712
+        .limit(1)
     )
-    account = result.scalar_one_or_none()
+    account = result.scalars().first()
 
     if account is None:
         account = Account(
@@ -141,7 +148,12 @@ async def process_import(
     6. Save import record
     7. Return import record (caller triggers Celery tasks)
     """
-    from app.services.parsers import parse_amex_csv, parse_hsbc_csv, parse_monzo_csv, parse_starling_csv
+    from app.services.parsers import (
+        parse_amex_csv,
+        parse_hsbc_csv,
+        parse_monzo_csv,
+        parse_starling_csv,
+    )
 
     # Detect format
     bank_format = detect_format(filename, content)
@@ -223,10 +235,12 @@ async def process_import(
     import_record.status = "completed"  # type: ignore[assignment]
     if dates:
         import_record.date_range_start = min(
-            d.date() if hasattr(d, "date") else d for d in dates  # type: ignore[misc]
+            d.date() if hasattr(d, "date") else d
+            for d in dates  # type: ignore[misc]
         )
         import_record.date_range_end = max(
-            d.date() if hasattr(d, "date") else d for d in dates  # type: ignore[misc]
+            d.date() if hasattr(d, "date") else d
+            for d in dates  # type: ignore[misc]
         )
 
     # Update account balance to most recent balance_after if available

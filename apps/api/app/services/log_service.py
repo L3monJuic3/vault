@@ -26,7 +26,7 @@ async def write_log(
         created_at=datetime.now(timezone.utc),
     )
     db.add(entry)
-    await db.commit()
+    await db.flush()
     return entry
 
 
