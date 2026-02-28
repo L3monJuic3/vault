@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { AppearanceTab } from "@/components/settings/AppearanceTab";
+import { ProfileTab } from "@/components/settings/ProfileTab";
 import { CategoriesTab } from "@/components/settings/CategoriesTab";
-import { ExportTab } from "@/components/settings/ExportTab";
 import { AccountsTab } from "@/components/settings/AccountsTab";
 import { ImportHistoryTab } from "@/components/settings/ImportHistoryTab";
+import { ExportTab } from "@/components/settings/ExportTab";
 
 const tabs = [
+  { id: "appearance", label: "Appearance" },
+  { id: "profile", label: "Profile" },
   { id: "categories", label: "Categories" },
   { id: "accounts", label: "Accounts" },
   { id: "imports", label: "Import History" },
@@ -16,14 +20,14 @@ const tabs = [
 type TabId = (typeof tabs)[number]["id"];
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("categories");
+  const [activeTab, setActiveTab] = useState<TabId>("appearance");
 
   return (
     <main className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-[var(--muted-foreground)]">
-          Manage categories, accounts, and export your data
+          Manage your preferences and account settings
         </p>
       </div>
 
@@ -44,6 +48,8 @@ export default function SettingsPage() {
         ))}
       </div>
 
+      {activeTab === "appearance" && <AppearanceTab />}
+      {activeTab === "profile" && <ProfileTab />}
       {activeTab === "categories" && <CategoriesTab />}
       {activeTab === "accounts" && <AccountsTab />}
       {activeTab === "imports" && <ImportHistoryTab />}
