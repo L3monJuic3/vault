@@ -77,7 +77,7 @@ async def get_transactions(
     if has_more:
         items = items[:limit]
 
-    next_cursor = items[-1].id if has_more and items else None
+    next_cursor: UUID | None = UUID(str(items[-1].id)) if has_more and items else None
 
     return items, next_cursor, has_more  # type: ignore[return-value]
 
