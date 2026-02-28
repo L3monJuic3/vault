@@ -1,73 +1,114 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap");
+
+/* ═══════════════════════════════════════════════
+   Vault Design System v2
+   Refined dark minimalism with data density
+   ═══════════════════════════════════════════════ */
 
 /* ─── Dark Mode (default) ─── */
 :root {
+  /* === Surfaces (layered depth system) === */
   --background: #09090b;
-  --surface: #18181b;
-  --surface-raised: #27272a;
-  --foreground: #fafafa;
-  --foreground-muted: #a1a1aa;
+  --surface: #111114;
+  --surface-raised: #1a1a1f;
+  --surface-overlay: #222228;
+
+  /* === Borders === */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(99, 102, 241, 0.3);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+
+  /* === Text === */
+  --foreground: #f0f0f5;
+  --foreground-secondary: #a1a1aa;
+  --foreground-muted: #52525b;
+  --foreground-inverse: #09090b;
   --foreground-subtle: #52525b;
 
-  --card: #18181b;
-  --card-foreground: #fafafa;
-  --card-border: #27272a;
+  /* === Card (backwards compat) === */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --card-border: var(--border);
 
+  /* === Accent (Indigo) === */
   --primary: #6366f1;
-  --primary-hover: #4f46e5;
+  --primary-hover: #818cf8;
   --primary-foreground: #ffffff;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-muted: rgba(99, 102, 241, 0.12);
+  --accent-glow: rgba(99, 102, 241, 0.06);
 
-  --sidebar: #09090b;
-  --sidebar-border: #27272a;
-  --sidebar-item-hover: #27272a;
-  --sidebar-item-active: #27272a;
-  --sidebar-item-active-border: #6366f1;
-
-  --success: #10b981;
-  --warning: #f59e0b;
-  --destructive: #ef4444;
-  --income: #10b981;
-  --spending: #ef4444;
-
-  /* Tint tokens — semantic backgrounds */
+  /* === Semantic tint tokens === */
   --primary-light: rgba(99, 102, 241, 0.12);
   --primary-lighter: rgba(99, 102, 241, 0.06);
+
+  /* === Semantic === */
+  --success: #10b981;
+  --income: #10b981;
+  --income-muted: rgba(16, 185, 129, 0.12);
   --success-light: rgba(16, 185, 129, 0.12);
-  --destructive-light: rgba(239, 68, 68, 0.12);
+
+  --spending: #ef4444;
+  --destructive: #ef4444;
+  --spending-muted: rgba(239, 68, 68, 0.1);
+  --destructive-light: rgba(239, 68, 68, 0.1);
+
+  --warning: #f59e0b;
+  --warning-muted: rgba(245, 158, 11, 0.12);
   --warning-light: rgba(245, 158, 11, 0.12);
 
-  --border: #27272a;
-  --border-subtle: #1c1c1f;
+  --gold: #d4a574;
+
+  /* === Sidebar === */
+  --sidebar: #09090b;
+  --sidebar-bg: #09090b;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-item-hover: rgba(255, 255, 255, 0.04);
+  --sidebar-item-active: rgba(99, 102, 241, 0.08);
+  --sidebar-item-active-border: #6366f1;
+  --sidebar-accent: #6366f1;
+
+  /* === Muted (backwards compat) === */
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--foreground-secondary);
   --ring: #6366f1;
-  --radius: 8px;
-  --radius-sm: 6px;
-  --radius-lg: 12px;
-  --radius-xl: 14px;
-  --radius-2xl: 20px;
+
+  /* === Radius === */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
   --radius-full: 9999px;
 
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
+  /* === Typography === */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", ui-monospace, monospace;
 
-  --surface-overlay: #1e1e22;
+  /* === Spacing === */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
 
-  /* Layered shadow scale */
+  /* === Shadows === */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.16);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 20px var(--accent-glow);
 
-  /* Card elevation */
   --card-shadow: var(--shadow-xs);
   --card-shadow-hover: var(--shadow-md);
 
-  /* Timing */
+  /* === Timing === */
   --transition-snappy: cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* Fonts */
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 /* ─── Light Mode ─── */
@@ -75,8 +116,17 @@
   --background: #ffffff;
   --surface: #f4f4f5;
   --surface-raised: #ffffff;
+  --surface-overlay: #f9fafb;
+
+  --border: #e4e4e7;
+  --border-hover: #d4d4d8;
+  --border-accent: rgba(99, 102, 241, 0.3);
+  --border-subtle: #f4f4f5;
+
   --foreground: #09090b;
-  --foreground-muted: #71717a;
+  --foreground-secondary: #71717a;
+  --foreground-muted: #a1a1aa;
+  --foreground-inverse: #fafafa;
   --foreground-subtle: #a1a1aa;
 
   --card: #ffffff;
@@ -84,28 +134,30 @@
   --card-border: #e4e4e7;
 
   --sidebar: #ffffff;
+  --sidebar-bg: #ffffff;
   --sidebar-border: #e4e4e7;
   --sidebar-item-hover: #f4f4f5;
-  --sidebar-item-active: #f4f4f5;
-  --sidebar-item-active-border: #6366f1;
+  --sidebar-item-active: rgba(99, 102, 241, 0.06);
 
   --primary-light: rgba(99, 102, 241, 0.08);
   --primary-lighter: rgba(99, 102, 241, 0.04);
   --success-light: rgba(16, 185, 129, 0.08);
   --destructive-light: rgba(239, 68, 68, 0.08);
   --warning-light: rgba(245, 158, 11, 0.08);
+  --income-muted: rgba(16, 185, 129, 0.08);
+  --spending-muted: rgba(239, 68, 68, 0.06);
+  --warning-muted: rgba(245, 158, 11, 0.08);
+  --accent-muted: rgba(99, 102, 241, 0.06);
+  --accent-glow: rgba(99, 102, 241, 0.03);
 
-  --border: #e4e4e7;
-  --border-subtle: #f4f4f5;
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
-
-  --surface-overlay: #f9fafb;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.03);
 
   --card-shadow: var(--shadow-xs);
   --card-shadow-hover: var(--shadow-sm);
@@ -119,38 +171,58 @@
   padding: 0;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+html {
+  color-scheme: dark;
 }
 
-/* Mono numbers utility */
-.font-mono {
-  font-family: var(--font-mono);
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+/* ─── Selection ─── */
+::selection { background: var(--accent-muted); color: var(--foreground); }
+
+/* ─── Focus visible ─── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 /* ─── Typography Scale ─── */
 
 .text-page-title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   letter-spacing: -0.025em;
-  line-height: 1.2;
+  line-height: 32px;
   color: var(--foreground);
 }
 
 .text-page-subtitle {
-  font-size: 0.875rem;
+  font-size: 13px;
   color: var(--foreground-muted);
-  margin-top: 0.25rem;
+  margin-top: 4px;
 }
 
 .text-section-label {
-  font-size: 0.6875rem;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -159,31 +231,52 @@ body {
 
 .text-field-label {
   display: block;
-  font-size: 0.8125rem;
+  font-size: 13px;
   font-weight: 500;
   color: var(--foreground);
-  margin-bottom: 0.375rem;
+  margin-bottom: 6px;
 }
 
 .text-hint {
-  font-size: 0.75rem;
+  font-size: 12px;
   color: var(--foreground-muted);
 }
 
-/* Scrollbar — subtle */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ─── Mono Utility Classes ─── */
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+.label {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--foreground-muted);
 }
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground-subtle);
+
+.mono-lg {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mono-xl {
+  font-family: var(--font-mono);
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ─── Keyframe Animations ─── */
@@ -200,12 +293,8 @@ body {
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
 }
 
 @keyframes checkmark-draw {
@@ -215,12 +304,8 @@ body {
 }
 
 @keyframes progress-fill {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
+  from { width: 0%; }
+  to { width: 100%; }
 }
 
 @keyframes cardEnter {
@@ -232,6 +317,16 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* ─── Animation Utility Classes ─── */
@@ -247,12 +342,25 @@ body {
 .animate-shimmer {
   background: linear-gradient(
     90deg,
-    var(--muted) 25%,
+    var(--surface) 25%,
     var(--surface-raised) 50%,
-    var(--muted) 75%
+    var(--surface) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface) 0%,
+    var(--surface-raised) 40%,
+    var(--surface-raised) 60%,
+    var(--surface) 100%
+  );
+  background-size: 200px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
 }
 
 /* ─── Stagger Delay Utilities ─── */
@@ -263,3 +371,12 @@ body {
 .stagger-4 { animation-delay: 240ms; }
 .stagger-5 { animation-delay: 320ms; }
 .stagger-6 { animation-delay: 400ms; }
+
+/* ─── Interactive Elements ─── */
+
+button, [role="button"] {
+  transition: transform 0.1s ease;
+}
+button:active, [role="button"]:active {
+  transform: scale(0.98);
+}
