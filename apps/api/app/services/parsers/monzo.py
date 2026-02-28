@@ -1,7 +1,7 @@
 import csv
 import io
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 
 def parse_monzo_csv(file_content: str) -> list[dict]:
@@ -29,16 +29,19 @@ def parse_monzo_csv(file_content: str) -> list[dict]:
             continue
 
         # Amount is already correctly signed in Monzo exports
-        amount_str = row.get("Amount", "").strip().replace(",", "")
+        amount_str = (row.get("Amount") or "").strip().replace(",", "")
         if not amount_str:
             continue
 
-        amount = Decimal(amount_str)
+        try:
+            amount = Decimal(amount_str)
+        except InvalidOperation:
+            continue
 
         # Use Name as primary merchant, fall back to Description
-        name = row.get("Name", "").strip()
-        description = row.get("Description", "").strip()
-        notes = row.get("Notes and #tags", "").strip()
+        name = (row.get("Name") or "").strip()
+        description = (row.get("Description") or "").strip()
+        notes = (row.get("Notes and #tags") or "").strip()
 
         # Build a useful description from available fields
         display_description = description or name

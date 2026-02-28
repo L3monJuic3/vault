@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from uuid import UUID
 
@@ -90,10 +90,8 @@ async def detect_subscriptions(
             continue
 
         # Detect frequency
-        dates = [
-            txn.date.date()
-            if hasattr(txn.date, "date") and callable(txn.date.date)
-            else txn.date
+        dates: list[date] = [
+            txn.date.date() if isinstance(txn.date, datetime) else txn.date
             for txn in txns
         ]
         frequency = _detect_frequency(dates)
@@ -139,7 +137,7 @@ async def detect_subscriptions(
         # Mark transactions as recurring
         for txn in txns:
             txn.is_recurring = True  # type: ignore[assignment]
-            txn.recurring_group_id = group.id
+            txn.recurring_group_id = group.id  # type: ignore[assignment]
 
     await db.flush()
     logger.info(f"Detected {len(created_groups)} subscriptions for user {user_id}")

@@ -1,7 +1,7 @@
 import csv
 import io
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 
 def parse_starling_csv(file_content: str) -> list[dict]:
@@ -32,13 +32,16 @@ def parse_starling_csv(file_content: str) -> list[dict]:
         amount_str = ""
         for key in row:
             if key.startswith("Amount"):
-                amount_str = row[key].strip().replace(",", "")
+                amount_str = (row.get(key) or "").strip().replace(",", "")
                 break
 
         if not amount_str:
             continue
 
-        amount = Decimal(amount_str)
+        try:
+            amount = Decimal(amount_str)
+        except InvalidOperation:
+            continue
 
         # Counter Party is the merchant name
         counter_party = row.get("Counter Party", "").strip()
@@ -55,9 +58,12 @@ def parse_starling_csv(file_content: str) -> list[dict]:
         balance_after = None
         for key in row:
             if key.startswith("Balance"):
-                balance_str = row[key].strip().replace(",", "")
+                balance_str = (row.get(key) or "").strip().replace(",", "")
                 if balance_str:
-                    balance_after = Decimal(balance_str)
+                    try:
+                        balance_after = Decimal(balance_str)
+                    except InvalidOperation:
+                        balance_after = None
                 break
 
         transactions.append(

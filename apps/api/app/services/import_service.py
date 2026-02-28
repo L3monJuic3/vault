@@ -166,7 +166,7 @@ async def process_import(
     await db.flush()
 
     # Deduplicate
-    existing_hashes = await get_existing_hashes(db, account.id)
+    existing_hashes = await get_existing_hashes(db, account.id)  # type: ignore[arg-type]
     new_transactions = []
     duplicates = 0
 
@@ -200,8 +200,8 @@ async def process_import(
 
     # Update import record
     dates = [t.date for t in new_transactions]
-    import_record.row_count = len(new_transactions)
-    import_record.duplicates_skipped = duplicates
+    import_record.row_count = len(new_transactions)  # type: ignore[assignment]
+    import_record.duplicates_skipped = duplicates  # type: ignore[assignment]
     import_record.status = "completed"
     if dates:
         import_record.date_range_start = min(
