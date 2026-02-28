@@ -161,7 +161,7 @@ export function TransactionTable() {
                   : transactions.map((txn, index) => (
                       <tr
                         key={txn.id}
-                        className="animate-fade-in-up border-b border-[var(--border)] transition-all duration-150 hover:bg-[var(--accent)]"
+                        className="animate-fade-in-up border-b border-[var(--border)] transition-all duration-150 hover:bg-[var(--muted)]"
                         style={{
                           animationDelay: `${Math.min(index * 30, 300)}ms`,
                           position: "relative",

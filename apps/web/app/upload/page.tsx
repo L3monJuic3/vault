@@ -171,7 +171,6 @@ export default function UploadPage() {
             border: `2px dashed ${isDragging ? "var(--primary)" : "var(--border)"}`,
             borderRadius: "var(--radius-lg)",
             background: isDragging ? "rgba(99,102,241,0.05)" : "var(--surface)",
-            boxShadow: isDragging ? "0 0 20px var(--glow-primary)" : "none",
             padding: "48px 32px",
             textAlign: "center",
             transition: "all 0.25s var(--transition-snappy)",
@@ -185,7 +184,7 @@ export default function UploadPage() {
                   fontSize: "32px",
                   marginBottom: "12px",
                   transition: "transform 0.2s var(--transition-snappy)",
-                  transform: isDragging ? "translateY(-4px) scale(1.1)" : "none",
+                  transform: isDragging ? "scale(1.02)" : "none",
                 }}
               >
                 ↑
@@ -266,7 +265,7 @@ export default function UploadPage() {
         <div
           className="animate-fade-in-up"
           style={{
-            background: "var(--glow-error)",
+            background: "rgba(239, 68, 68, 0.08)",
             border: "1px solid rgba(239,68,68,0.3)",
             borderRadius: "var(--radius)",
             padding: "12px 16px",

@@ -67,7 +67,7 @@ export function RecentTransactions() {
               {transactions.map((txn) => (
                 <div
                   key={txn.id}
-                  className="flex items-center justify-between rounded-md px-2 py-2.5 transition-colors hover:bg-[var(--accent)]"
+                  className="flex items-center justify-between rounded-md px-2 py-2.5 transition-colors hover:bg-[var(--muted)]"
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
                     <span className="shrink-0 text-xs text-[var(--muted-foreground)]">

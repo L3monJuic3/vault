@@ -70,7 +70,6 @@ function StatusBadge({ status }: { status: RecurringGroupRead["status"] }) {
     >
       {status === "active" && (
         <span
-          className="animate-pulse-glow"
           style={{
             width: "5px",
             height: "5px",

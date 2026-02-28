@@ -23,28 +23,24 @@ const kpiConfig = [
     label: "Total Balance",
     icon: "\u{1F4B0}",
     colorClass: "text-[var(--foreground)]",
-    glowColor: "var(--foreground)",
   },
   {
     key: "monthly_income" as const,
     label: "Monthly Income",
     icon: "\u{1F4C8}",
     colorClass: "text-[var(--success)]",
-    glowColor: "var(--success)",
   },
   {
     key: "monthly_spending" as const,
     label: "Monthly Spending",
     icon: "\u{1F4C9}",
     colorClass: "text-[var(--destructive)]",
-    glowColor: "var(--destructive)",
   },
   {
     key: "subscription_total" as const,
     label: "Subscriptions",
     icon: "\u{1F4F1}",
     colorClass: "text-[var(--primary)]",
-    glowColor: "var(--primary)",
   },
 ];
 
@@ -73,7 +69,6 @@ export function KPICards({ stats, isLoading }: KPICardsProps) {
       {kpiConfig.map((kpi, index) => (
         <Card
           key={kpi.key}
-          glowColor={kpi.glowColor}
           className={`animate-fade-in-up stagger-${index + 1}`}
         >
           <CardContent className="p-6">
