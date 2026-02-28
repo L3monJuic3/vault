@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, PageWrapper, PageHeader } from "@/components/ui";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Upload as UploadIcon, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 type UploadStatus = "idle" | "dragging" | "file" | "uploading" | "success" | "error";
 
@@ -36,10 +36,24 @@ function UploadProgress() {
   }, []);
 
   return (
-    <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-[var(--border)]">
+    <div
+      style={{
+        marginTop: 16,
+        height: 3,
+        width: "100%",
+        borderRadius: "var(--radius-full)",
+        background: "var(--surface-raised)",
+        overflow: "hidden",
+      }}
+    >
       <div
-        className="h-full rounded-full bg-[var(--primary)] transition-all duration-150"
-        style={{ width: `${Math.min(progress, 95)}%` }}
+        style={{
+          height: "100%",
+          borderRadius: "var(--radius-full)",
+          background: "var(--accent)",
+          transition: "width 0.15s ease",
+          width: `${Math.min(progress, 95)}%`,
+        }}
       />
     </div>
   );
@@ -52,7 +66,7 @@ function AnimatedCheckmark() {
       height="48"
       viewBox="0 0 48 48"
       fill="none"
-      className="mx-auto mb-3"
+      style={{ margin: "0 auto 12px" }}
     >
       <circle
         cx="24"
@@ -60,7 +74,7 @@ function AnimatedCheckmark() {
         r="20"
         stroke="var(--success)"
         strokeWidth="2"
-        fill="var(--success-light)"
+        fill="var(--income-muted)"
       />
       <path
         d="M15 24L21 30L33 18"
@@ -140,12 +154,31 @@ export default function UploadPage() {
   const isDragging = status === "dragging";
 
   return (
-    <PageWrapper maxWidth="md" className="animate-fade-in-up">
-      <PageHeader
-        title="Upload"
-        subtitle="Import a bank statement to get started"
-      />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      style={{ padding: "32px 32px 48px", maxWidth: 640, margin: "0 auto" }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: 28 }}>
+        <h1
+          style={{
+            fontSize: 24,
+            fontWeight: 600,
+            letterSpacing: "-0.025em",
+            color: "var(--foreground)",
+            lineHeight: "32px",
+          }}
+        >
+          Upload
+        </h1>
+        <p style={{ fontSize: 13, color: "var(--foreground-muted)", marginTop: 4 }}>
+          Import a bank statement to get started
+        </p>
+      </div>
 
+      {/* Drop zone */}
       {status !== "success" && (
         <div
           onDrop={handleDrop}
@@ -154,56 +187,118 @@ export default function UploadPage() {
             setStatus("dragging");
           }}
           onDragLeave={() => setStatus(file ? "file" : "idle")}
-          className={cn(
-            "mb-4 rounded-[var(--radius-lg)] border-2 border-dashed p-12 text-center transition-all duration-200",
-            isDragging
-              ? "border-[var(--primary)] bg-[var(--primary-lighter)]"
-              : "border-[var(--border)] bg-[var(--surface)]",
-          )}
+          style={{
+            marginBottom: 16,
+            padding: "48px 32px",
+            textAlign: "center",
+            borderRadius: "var(--radius-lg)",
+            border: `2px dashed ${isDragging ? "var(--accent)" : "var(--border)"}`,
+            background: isDragging
+              ? "radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%)"
+              : "var(--surface)",
+            transition: "all 0.2s ease",
+            position: "relative",
+            overflow: "hidden",
+          }}
         >
+          {/* Atmospheric glow behind icon when dragging */}
+          {isDragging && (
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: 200,
+                height: 200,
+                transform: "translate(-50%, -50%)",
+                borderRadius: "50%",
+                background: "radial-gradient(circle, var(--accent-muted) 0%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+
           {!file ? (
-            <>
+            <div style={{ position: "relative" }}>
               <div
-                className={cn(
-                  "mb-3 flex justify-center transition-transform duration-200",
-                  isDragging && "scale-110",
-                )}
+                style={{
+                  marginBottom: 12,
+                  display: "flex",
+                  justifyContent: "center",
+                  transition: "transform 0.2s ease",
+                  transform: isDragging ? "scale(1.1)" : "scale(1)",
+                }}
               >
                 <UploadIcon
                   size={32}
-                  className="text-[var(--foreground-muted)]"
+                  style={{ color: isDragging ? "var(--accent)" : "var(--foreground-muted)" }}
                 />
               </div>
-              <p className="mb-1 text-[15px] text-[var(--foreground)]">
+              <p style={{ fontSize: 15, color: "var(--foreground)", marginBottom: 4 }}>
                 Drag your statement here
               </p>
-              <p className="text-[13px] text-[var(--foreground-muted)]">
+              <p style={{ fontSize: 13, color: "var(--foreground-muted)" }}>
                 or{" "}
-                <label className="cursor-pointer text-[var(--primary)] underline">
+                <label
+                  style={{
+                    cursor: "pointer",
+                    color: "var(--accent)",
+                    textDecoration: "underline",
+                  }}
+                >
                   browse files
                   <input
                     type="file"
                     accept=".csv"
-                    className="hidden"
+                    style={{ display: "none" }}
                     onChange={(e) =>
                       e.target.files?.[0] && handleFile(e.target.files[0])
                     }
                   />
                 </label>
               </p>
-            </>
+            </div>
           ) : (
-            <div className="animate-fade-in-up">
-              {/* File preview card */}
-              <div className="mb-4 inline-flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3 text-left">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-light)]">
-                  <FileText size={18} className="text-[var(--primary)]" />
+            <div className="animate-fade-in-up" style={{ position: "relative" }}>
+              {/* File preview */}
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 16px",
+                  borderRadius: "var(--radius)",
+                  border: "1px solid var(--border)",
+                  background: "var(--surface-raised)",
+                  textAlign: "left",
+                  marginBottom: 8,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "var(--radius-sm)",
+                    background: "var(--accent-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <FileText size={18} style={{ color: "var(--accent)" }} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[var(--foreground)]">
+                  <p style={{ fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>
                     {file.name}
                   </p>
-                  <p className="font-mono text-xs text-[var(--foreground-muted)]">
+                  <p
+                    style={{
+                      fontSize: 11,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--foreground-muted)",
+                    }}
+                  >
                     {(file.size / 1024).toFixed(1)} KB
                   </p>
                 </div>
@@ -212,15 +307,11 @@ export default function UploadPage() {
               {isUploading ? (
                 <UploadProgress />
               ) : (
-                <div className="mt-2 flex justify-center gap-2">
+                <div style={{ marginTop: 12, display: "flex", justifyContent: "center", gap: 8 }}>
                   <Button onClick={handleUpload} disabled={isUploading}>
                     Upload &amp; Process
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleReset}
-                    disabled={isUploading}
-                  >
+                  <Button variant="outline" onClick={handleReset} disabled={isUploading}>
                     Remove
                   </Button>
                 </div>
@@ -230,37 +321,59 @@ export default function UploadPage() {
         </div>
       )}
 
+      {/* Error message */}
       {status === "error" && (
-        <div className="animate-fade-in-up mb-4 rounded-[var(--radius)] border border-[var(--destructive)]/30 bg-[var(--destructive-light)] px-4 py-3 text-[13px] text-[var(--destructive)]">
+        <div
+          className="animate-fade-in-up"
+          style={{
+            marginBottom: 16,
+            padding: "10px 14px",
+            borderRadius: "var(--radius)",
+            border: "1px solid var(--spending)",
+            background: "var(--spending-muted)",
+            fontSize: 13,
+            color: "var(--spending)",
+          }}
+        >
           {errorMessage || "Upload failed. Please try again."}
         </div>
       )}
 
+      {/* Success state */}
       {status === "success" && result && (
-        <div className="animate-fade-in-up mb-4 rounded-[var(--radius-lg)] border border-[var(--success)]/20 bg-[var(--success-light)] p-8 text-center">
+        <div
+          className="animate-fade-in-up"
+          style={{
+            marginBottom: 16,
+            padding: "32px",
+            borderRadius: "var(--radius-lg)",
+            border: "1px solid var(--income)",
+            background: "var(--income-muted)",
+            textAlign: "center",
+          }}
+        >
           <AnimatedCheckmark />
-          <p className="mb-3 text-base font-semibold text-[var(--success)]">
+          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--income)", marginBottom: 16 }}>
             Upload complete
           </p>
-          <div className="mb-5 flex justify-center gap-6">
-            <div className="text-center">
-              <p className="text-2xl font-bold font-mono text-[var(--foreground)]">
+          <div style={{ display: "flex", justifyContent: "center", gap: 32, marginBottom: 20 }}>
+            <div style={{ textAlign: "center" }}>
+              <p className="mono-lg" style={{ color: "var(--foreground)" }}>
                 {result.row_count}
               </p>
               <p className="text-hint">transactions imported</p>
             </div>
             {result.duplicates_skipped > 0 && (
-              <div className="text-center">
-                <p className="text-2xl font-bold font-mono text-[var(--foreground-muted)]">
+              <div style={{ textAlign: "center" }}>
+                <p className="mono-lg" style={{ color: "var(--foreground-muted)" }}>
                   {result.duplicates_skipped}
                 </p>
                 <p className="text-hint">duplicates skipped</p>
               </div>
             )}
           </div>
-          <p className="text-hint mb-5">
-            AI categorisation is running in the background. Dashboard will
-            update shortly.
+          <p className="text-hint" style={{ marginBottom: 20 }}>
+            AI categorisation is running in the background. Dashboard will update shortly.
           </p>
           <Button variant="outline" onClick={handleReset}>
             Upload another
@@ -268,64 +381,59 @@ export default function UploadPage() {
         </div>
       )}
 
-      <Card className="animate-fade-in-up stagger-2">
-        <CardHeader>
-          <CardTitle>Supported formats</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="border-b border-[var(--border)]">
-                <th className="py-2 text-left text-xs font-medium text-[var(--foreground-muted)]">
-                  Bank
-                </th>
-                <th className="py-2 text-left text-xs font-medium text-[var(--foreground-muted)]">
-                  Format
-                </th>
-                <th className="py-2 text-left text-xs font-medium text-[var(--foreground-muted)]">
-                  Status
-                </th>
+      {/* Supported formats */}
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "var(--space-5)",
+        }}
+      >
+        <div className="label" style={{ marginBottom: 12 }}>
+          Supported Formats
+        </div>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid var(--border)" }}>
+              <th className="label" style={{ padding: "8px 0", textAlign: "left" }}>Bank</th>
+              <th className="label" style={{ padding: "8px 0", textAlign: "left" }}>Format</th>
+              <th className="label" style={{ padding: "8px 0", textAlign: "left" }}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { bank: "American Express", format: "CSV" },
+              { bank: "HSBC", format: "CSV" },
+              { bank: "Monzo", format: "CSV" },
+              { bank: "Starling", format: "CSV" },
+            ].map((row) => (
+              <tr key={row.bank} style={{ borderBottom: "1px solid var(--border)" }}>
+                <td style={{ padding: "8px 0", color: "var(--foreground)" }}>{row.bank}</td>
+                <td style={{ padding: "8px 0" }}>
+                  <Badge variant="muted">{row.format}</Badge>
+                </td>
+                <td style={{ padding: "8px 0" }}>
+                  <Badge variant="success">Supported</Badge>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {[
-                { bank: "American Express", format: "CSV", status: "Supported" },
-                { bank: "HSBC", format: "CSV", status: "Supported" },
-                { bank: "Monzo", format: "CSV", status: "Supported" },
-                { bank: "Starling", format: "CSV", status: "Supported" },
-              ].map((row) => (
-                <tr
-                  key={row.bank}
-                  className="border-b border-[var(--border)]"
-                >
-                  <td className="py-2 text-sm text-[var(--foreground)]">
-                    {row.bank}
-                  </td>
-                  <td className="py-2">
-                    <span className="rounded-[var(--radius-sm)] bg-[var(--surface-raised)] px-1.5 py-0.5 font-mono text-xs text-[var(--foreground-muted)]">
-                      {row.format}
-                    </span>
-                  </td>
-                  <td className="py-2 text-xs text-[var(--success)]">
-                    {row.status}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="mt-3 text-hint">
-            Using a different bank?{" "}
-            <a
-              href="https://github.com/L3monJuic3/vault"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[var(--primary)] hover:underline"
-            >
-              Contribute a parser on GitHub
-            </a>
-          </p>
-        </CardContent>
-      </Card>
-    </PageWrapper>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-hint" style={{ marginTop: 12 }}>
+          Using a different bank?{" "}
+          <a
+            href="https://github.com/L3monJuic3/vault"
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: "var(--accent)", textDecoration: "none" }}
+            onMouseEnter={(e) => { e.currentTarget.style.textDecoration = "underline"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.textDecoration = "none"; }}
+          >
+            Contribute a parser on GitHub
+          </a>
+        </p>
+      </div>
+    </motion.div>
   );
 }
