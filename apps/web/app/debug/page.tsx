@@ -149,7 +149,6 @@ function LogRow({
 
 // -- Page ---------------------------------------------------------------------
 
-const LOG_LEVELS = ["ALL", "ERROR", "WARNING", "INFO", "DEBUG"];
 const LOG_CATEGORIES = ["ALL", "http", "parse", "ai", "auth", "system", "task"];
 
 export default function DebugPage() {

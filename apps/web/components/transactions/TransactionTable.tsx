@@ -158,7 +158,7 @@ export function TransactionTable() {
                         </td>
                       </tr>
                     ))
-                  : transactions.map((txn, index) => (
+                  : transactions.map((txn) => (
                       <tr
                         key={txn.id}
                         className="border-b border-[var(--border)] transition-colors duration-150 hover:bg-[var(--surface-raised)]"
