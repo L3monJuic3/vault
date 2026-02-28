@@ -2,11 +2,13 @@
 
 import { useThemeStore } from "@/hooks/use-theme";
 import type { ThemeMode } from "@/hooks/use-theme";
+import { Sun, Moon, Monitor, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const MODES: { value: ThemeMode; label: string; icon: React.ReactNode }[] = [
-  { value: "light", label: "Light", icon: <SunIcon /> },
-  { value: "dark", label: "Dark", icon: <MoonIcon /> },
-  { value: "system", label: "System", icon: <MonitorIcon /> },
+const MODES: { value: ThemeMode; label: string; Icon: typeof Sun }[] = [
+  { value: "light", label: "Light", Icon: Sun },
+  { value: "dark", label: "Dark", Icon: Moon },
+  { value: "system", label: "System", Icon: Monitor },
 ];
 
 const ACCENTS = [
@@ -25,52 +27,40 @@ export function AppearanceTab() {
   const setAccent = useThemeStore((s) => s.setAccent);
 
   return (
-    <div style={{ maxWidth: "480px" }}>
+    <div className="max-w-md">
       {/* Theme mode */}
-      <div style={{ marginBottom: "32px" }}>
-        <h3
-          style={{
-            fontSize: "14px",
-            fontWeight: 600,
-            color: "var(--foreground)",
-            marginBottom: "4px",
-          }}
-        >
+      <div className="mb-8">
+        <h3 className="text-sm font-semibold text-[var(--foreground)]">
           Theme
         </h3>
-        <p
-          style={{
-            fontSize: "13px",
-            color: "var(--muted-foreground)",
-            marginBottom: "12px",
-          }}
-        >
+        <p className="mt-1 mb-3 text-[13px] text-[var(--foreground-muted)]">
           Choose how Vault looks to you.
         </p>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+        <div className="grid grid-cols-3 gap-2">
           {MODES.map((m) => {
             const isSelected = mode === m.value;
             return (
               <button
                 key={m.value}
                 onClick={() => setMode(m.value)}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "16px 12px",
-                  borderRadius: "var(--radius)",
-                  border: `1px solid ${isSelected ? "var(--primary)" : "var(--border)"}`,
-                  background: isSelected ? "rgba(99, 102, 241, 0.06)" : "transparent",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  color: isSelected ? "var(--foreground)" : "var(--muted-foreground)",
-                }}
+                className={cn(
+                  "flex flex-col items-center gap-2 rounded-[var(--radius)] border p-4 transition-all duration-150 cursor-pointer",
+                  isSelected
+                    ? "border-[var(--primary)] bg-[var(--primary-lighter)] text-[var(--foreground)]"
+                    : "border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--foreground-subtle)]",
+                )}
               >
-                <span style={{ opacity: isSelected ? 1 : 0.6 }}>{m.icon}</span>
-                <span style={{ fontSize: "13px", fontWeight: isSelected ? 500 : 400 }}>
+                <m.Icon
+                  size={20}
+                  className={cn(isSelected ? "opacity-100" : "opacity-50")}
+                />
+                <span
+                  className={cn(
+                    "text-[13px]",
+                    isSelected && "font-medium",
+                  )}
+                >
                   {m.label}
                 </span>
               </button>
@@ -81,27 +71,14 @@ export function AppearanceTab() {
 
       {/* Accent colour */}
       <div>
-        <h3
-          style={{
-            fontSize: "14px",
-            fontWeight: 600,
-            color: "var(--foreground)",
-            marginBottom: "4px",
-          }}
-        >
+        <h3 className="text-sm font-semibold text-[var(--foreground)]">
           Accent colour
         </h3>
-        <p
-          style={{
-            fontSize: "13px",
-            color: "var(--muted-foreground)",
-            marginBottom: "12px",
-          }}
-        >
+        <p className="mt-1 mb-3 text-[13px] text-[var(--foreground-muted)]">
           Used for buttons, links, and active states.
         </p>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div className="flex gap-2.5">
           {ACCENTS.map((a) => {
             const isSelected = accent === a.value;
             return (
@@ -109,42 +86,21 @@ export function AppearanceTab() {
                 key={a.value}
                 onClick={() => setAccent(a.value)}
                 title={a.label}
+                className={cn(
+                  "relative h-8 w-8 cursor-pointer rounded-full border-0 transition-all duration-150",
+                  isSelected &&
+                    "ring-2 ring-offset-2 ring-offset-[var(--background)]",
+                )}
                 style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
                   background: a.value,
-                  border: "none",
-                  cursor: "pointer",
-                  position: "relative",
-                  outline: isSelected
-                    ? `2px solid ${a.value}`
-                    : "none",
-                  outlineOffset: "3px",
-                  transition: "outline 0.15s ease",
+                  ...(isSelected ? { "--tw-ring-color": a.value } as React.CSSProperties : {}),
                 }}
               >
                 {isSelected && (
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    style={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50%",
-                      transform: "translate(-50%, -50%)",
-                    }}
-                  >
-                    <path
-                      d="M3 7L6 10L11 4"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <Check
+                    size={14}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
+                  />
                 )}
               </button>
             );
@@ -152,33 +108,5 @@ export function AppearanceTab() {
         </div>
       </div>
     </div>
-  );
-}
-
-/* ─── Inline SVG icons ─── */
-
-function SunIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <circle cx="10" cy="10" r="3.5" />
-      <path d="M10 2.5V4.5M10 15.5V17.5M2.5 10H4.5M15.5 10H17.5M4.7 4.7L6.1 6.1M13.9 13.9L15.3 15.3M4.7 15.3L6.1 13.9M13.9 6.1L15.3 4.7" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <path d="M17 11.5A7.5 7.5 0 1 1 8.5 3c.3 0 .5 0 .8.04A5.5 5.5 0 0 0 16.96 10.7c.04.26.04.53.04.8Z" />
-    </svg>
-  );
-}
-
-function MonitorIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="16" height="11" rx="1.5" />
-      <path d="M7 17.5H13M10 14V17.5" />
-    </svg>
   );
 }

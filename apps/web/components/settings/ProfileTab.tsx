@@ -9,9 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
 
 const CURRENCIES = [
-  { value: "GBP", label: "GBP (£)" },
+  { value: "GBP", label: "GBP (\u00A3)" },
   { value: "USD", label: "USD ($)" },
-  { value: "EUR", label: "EUR (€)" },
+  { value: "EUR", label: "EUR (\u20AC)" },
   { value: "NZD", label: "NZD ($)" },
 ];
 
@@ -48,37 +48,27 @@ export function ProfileTab() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6 space-y-4">
+      <Card className="max-w-md">
+        <CardContent className="space-y-4 p-5">
           <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full" />
           <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full" />
           <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div style={{ maxWidth: "480px" }}>
+    <div className="max-w-md">
       <Card>
-        <CardContent className="p-6">
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <CardContent className="p-5">
+          <div className="flex flex-col gap-5">
             {/* Name */}
             <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  color: "var(--foreground)",
-                  marginBottom: "6px",
-                }}
-              >
-                Name
-              </label>
+              <label className="text-field-label">Name</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -88,46 +78,18 @@ export function ProfileTab() {
 
             {/* Email (read-only) */}
             <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  color: "var(--foreground)",
-                  marginBottom: "6px",
-                }}
-              >
-                Email
-              </label>
+              <label className="text-field-label">Email</label>
               <Input
                 value={profile?.email ?? ""}
                 disabled
-                style={{ opacity: 0.6 }}
+                className="opacity-60"
               />
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "var(--muted-foreground)",
-                  marginTop: "4px",
-                }}
-              >
-                Email cannot be changed.
-              </p>
+              <p className="text-hint mt-1">Email cannot be changed.</p>
             </div>
 
             {/* Currency */}
             <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  color: "var(--foreground)",
-                  marginBottom: "6px",
-                }}
-              >
-                Currency
-              </label>
+              <label className="text-field-label">Currency</label>
               <Select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
@@ -141,7 +103,7 @@ export function ProfileTab() {
             </div>
 
             {/* Save */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div className="flex items-center gap-3">
               <Button
                 onClick={handleSave}
                 disabled={!hasChanges || updateProfile.isPending}
@@ -149,24 +111,12 @@ export function ProfileTab() {
                 {updateProfile.isPending ? "Saving..." : "Save changes"}
               </Button>
               {saved && (
-                <span
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--success)",
-                    fontWeight: 500,
-                  }}
-                >
+                <span className="text-sm font-medium text-[var(--success)]">
                   Saved
                 </span>
               )}
               {updateProfile.isError && (
-                <span
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--destructive)",
-                    fontWeight: 500,
-                  }}
-                >
+                <span className="text-sm font-medium text-[var(--destructive)]">
                   Failed to save
                 </span>
               )}
