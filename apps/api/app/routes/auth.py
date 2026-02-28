@@ -4,8 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import get_current_user
 from app.models.user import User
-from app.schemas.user import UserCreate, UserRead
+from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.services.auth_service import (
     authenticate_user,
     create_access_token,
@@ -53,5 +54,29 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
             detail="Invalid email or password",
         )
 
-    token = create_access_token(user.id)
+    token = create_access_token(user.id)  # type: ignore[arg-type]
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=UserRead)
+async def get_me(
+    user: User = Depends(get_current_user),
+):
+    """Return the currently authenticated user."""
+    return user
+
+
+@router.patch("/me", response_model=UserRead)
+async def update_me(
+    body: UserUpdate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update the current user's profile (name, currency)."""
+    if body.name is not None:
+        user.name = body.name  # type: ignore[assignment]
+    if body.currency is not None:
+        user.currency = body.currency  # type: ignore[assignment]
+    await db.flush()
+    await db.refresh(user)
+    return user

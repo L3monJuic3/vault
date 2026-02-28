@@ -41,7 +41,7 @@ async def list_transactions(
 ):
     items, next_cursor, has_more = await get_transactions(
         db,
-        user.id,
+        user.id,  # type: ignore[arg-type]
         cursor=cursor,
         limit=limit,
         date_from=date_from,
@@ -65,7 +65,7 @@ async def get_transaction(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    txn = await get_transaction_by_id(db, transaction_id, user.id)
+    txn = await get_transaction_by_id(db, transaction_id, user.id)  # type: ignore[arg-type]
     if txn is None:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return TransactionRead.model_validate(txn)
@@ -81,7 +81,7 @@ async def patch_transaction(
     txn = await update_transaction(
         db,
         transaction_id,
-        user.id,
+        user.id,  # type: ignore[arg-type]
         **update_data.model_dump(exclude_none=True),
     )
     if txn is None:
@@ -96,6 +96,6 @@ async def bulk_assign_category(
     user: User = Depends(get_current_user),
 ):
     count = await bulk_update_category(
-        db, body.transaction_ids, body.category_id, user.id
+        db, body.transaction_ids, body.category_id, user.id  # type: ignore[arg-type]
     )
     return {"updated": count}

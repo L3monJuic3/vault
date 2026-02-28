@@ -1,0 +1,7 @@
+Date,Time,Transaction Type,Name,Emoji,Category,Amount,Currency,Local amount,Local currency,Notes and #tags,Address,Receipt,Description,Category split,Money Out,Money In
+27/02/2026,14:32:05,Card payment,Tesco,,Groceries,-32.47,GBP,-32.47,GBP,Weekly shop,123 High Street,,TESCO STORES 2340,,32.47,
+26/02/2026,08:15:00,Card payment,TfL,,Transport,-2.80,GBP,-2.80,GBP,,,,TFL TRAVEL CHARGE,,2.80,
+25/02/2026,19:45:30,Card payment,Deliveroo,,Eating out,-18.50,GBP,-18.50,GBP,Friday treat,,,"DELIVEROO.CO.UK ORDER #12345",,18.50,
+24/02/2026,12:00:00,Card payment,Amazon,,Shopping,-29.99,GBP,-29.99,GBP,,,,AMAZON.CO.UK*RT5KX,,29.99,
+23/02/2026,00:00:00,Faster payment,SALARY,,,3500.00,GBP,3500.00,GBP,Monthly salary,,,SALARY PAYMENT,,,3500.00
+22/02/2026,09:00:00,Direct debit,Netflix,,Entertainment,-15.99,GBP,-15.99,GBP,,,,NETFLIX.COM,,15.99,

@@ -1,24 +1,19 @@
 import logging
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.recurring_group import (
-    Frequency,
-    RecurringGroup,
-    RecurringStatus,
-    RecurringType,
-)
+from app.models.recurring_group import RecurringGroup
 from app.models.transaction import Transaction
 
 logger = logging.getLogger(__name__)
 
 
-def _detect_frequency(dates: list[date]) -> Frequency | None:
+def _detect_frequency(dates: list[date]) -> str | None:
     """Detect the frequency of a recurring transaction from a list of dates."""
     if len(dates) < 2:
         return None
@@ -31,26 +26,26 @@ def _detect_frequency(dates: list[date]) -> Frequency | None:
     avg_gap = sum(gaps) / len(gaps)
 
     if 5 <= avg_gap <= 9:
-        return Frequency.weekly
+        return "weekly"
     elif 25 <= avg_gap <= 35:
-        return Frequency.monthly
+        return "monthly"
     elif 80 <= avg_gap <= 100:
-        return Frequency.quarterly
+        return "quarterly"
     elif 350 <= avg_gap <= 380:
-        return Frequency.annual
+        return "annual"
     return None
 
 
-def _predict_next_date(dates: list[date], frequency: Frequency) -> date:
+def _predict_next_date(dates: list[date], frequency: str) -> date:
     """Predict next expected date based on frequency."""
     last_date = max(dates)
-    if frequency == Frequency.weekly:
+    if frequency == "weekly":
         return last_date + timedelta(days=7)
-    elif frequency == Frequency.monthly:
+    elif frequency == "monthly":
         return last_date + timedelta(days=30)
-    elif frequency == Frequency.quarterly:
+    elif frequency == "quarterly":
         return last_date + timedelta(days=91)
-    elif frequency == Frequency.annual:
+    elif frequency == "annual":
         return last_date + timedelta(days=365)
     return last_date + timedelta(days=30)
 
@@ -95,10 +90,8 @@ async def detect_subscriptions(
             continue
 
         # Detect frequency
-        dates = [
-            txn.date.date()
-            if hasattr(txn.date, "date") and callable(txn.date.date)
-            else txn.date
+        dates: list[date] = [
+            txn.date.date() if isinstance(txn.date, datetime) else txn.date  # type: ignore[misc]
             for txn in txns
         ]
         frequency = _detect_frequency(dates)
@@ -118,13 +111,13 @@ async def detect_subscriptions(
             continue
 
         # Determine type
-        rec_type = RecurringType.subscription
+        rec_type = "subscription"
         if any(word in merchant_key for word in ["salary", "wages", "pay"]):
-            rec_type = RecurringType.salary
+            rec_type = "salary"
         elif any(
             word in merchant_key for word in ["council", "water", "electric", "gas"]
         ):
-            rec_type = RecurringType.direct_debit
+            rec_type = "direct_debit"
 
         # Create RecurringGroup
         next_date = _predict_next_date(dates, frequency)
@@ -134,7 +127,7 @@ async def detect_subscriptions(
             type=rec_type,
             frequency=frequency,
             estimated_amount=avg_amount,
-            status=RecurringStatus.active,
+            status="active",
             merchant_name=merchant_name,
             next_expected_date=next_date,
         )
@@ -143,8 +136,8 @@ async def detect_subscriptions(
 
         # Mark transactions as recurring
         for txn in txns:
-            txn.is_recurring = True
-            txn.recurring_group_id = group.id
+            txn.is_recurring = True  # type: ignore[assignment]
+            txn.recurring_group_id = group.id  # type: ignore[assignment]
 
     await db.flush()
     logger.info(f"Detected {len(created_groups)} subscriptions for user {user_id}")

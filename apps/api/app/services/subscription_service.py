@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.recurring_group import Frequency, RecurringGroup, RecurringStatus
+from app.models.recurring_group import RecurringGroup
 
 
 async def get_subscriptions(db: AsyncSession, user_id: UUID) -> list[RecurringGroup]:
@@ -51,7 +51,7 @@ async def dismiss_subscription(
     sub = await get_subscription_by_id(db, subscription_id, user_id)
     if sub is None:
         return None
-    sub.status = RecurringStatus.cancelled
+    sub.status = "cancelled"  # type: ignore[assignment]
     await db.flush()
     return sub
 
@@ -67,21 +67,25 @@ async def get_monthly_total(db: AsyncSession, user_id: UUID) -> Decimal:
     """
     query = select(RecurringGroup).where(
         RecurringGroup.user_id == user_id,
-        RecurringGroup.status == RecurringStatus.active,
+        RecurringGroup.status == "active",
     )
     result = await db.execute(query)
     subscriptions = result.scalars().all()
 
     total = Decimal("0")
     for sub in subscriptions:
-        amount = sub.estimated_amount or Decimal("0")
-        if sub.frequency == Frequency.weekly:
+        amount = (
+            Decimal(str(sub.estimated_amount)) if sub.estimated_amount else Decimal("0")
+        )
+        if sub.frequency == "weekly":
             total += amount * 52 / 12
-        elif sub.frequency == Frequency.monthly:
+        elif sub.frequency == "fortnightly":
+            total += amount * 26 / 12
+        elif sub.frequency == "monthly":
             total += amount
-        elif sub.frequency == Frequency.quarterly:
+        elif sub.frequency == "quarterly":
             total += amount / 3
-        elif sub.frequency == Frequency.annual:
+        elif sub.frequency in ("annual", "yearly"):
             total += amount / 12
 
     return total.quantize(Decimal("0.01"))

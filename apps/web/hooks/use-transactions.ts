@@ -22,6 +22,7 @@ export function useTransactions(filters?: TransactionFilter & { cursor?: string;
   const query = params.toString();
 
   return useQuery<CursorPage<TransactionRead>>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["transactions", filters],
     queryFn: () => apiFetch(`/api/v1/transactions${query ? `?${query}` : ""}`),
   });
@@ -29,6 +30,7 @@ export function useTransactions(filters?: TransactionFilter & { cursor?: string;
 
 export function useTransaction(id: string) {
   return useQuery<TransactionRead>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["transactions", id],
     queryFn: () => apiFetch(`/api/v1/transactions/${id}`),
     enabled: !!id,

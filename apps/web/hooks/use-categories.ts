@@ -6,6 +6,7 @@ import type { CategoryRead, CategoryCreate, CategoryUpdate } from "@vault/shared
 
 export function useCategories() {
   return useQuery<CategoryRead[]>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["categories"],
     queryFn: () => apiFetch("/api/v1/categories"),
   });

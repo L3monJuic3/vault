@@ -1,0 +1,42 @@
+services:
+  postgres:
+    restart: always
+    ports: []  # Not exposed externally in prod
+
+  redis:
+    restart: always
+    ports: []
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL_SYNC: ${DATABASE_URL_SYNC}
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_REQUIRED: ${AUTH_REQUIRED:-true}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://vault.local}
+      APP_ENV: production
+      APP_DEBUG: "false"
+    volumes: []  # No source mounts in prod
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+
+  worker:
+    restart: always
+    environment:
+      APP_ENV: production
+    volumes: []
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: prod
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://api:8000}
+    volumes: []

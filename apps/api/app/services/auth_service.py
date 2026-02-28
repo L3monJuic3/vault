@@ -77,6 +77,6 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
     user = result.scalar_one_or_none()
     if user is None:
         return None
-    if not verify_password(password, user.password_hash):
+    if not verify_password(password, user.password_hash):  # type: ignore[arg-type]
         return None
     return user

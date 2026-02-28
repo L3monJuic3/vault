@@ -1,16 +1,20 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export async function apiFetch<T>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const isFormData = options?.body instanceof FormData;
+  const headers: Record<string, string> = {
+    ...(options?.headers as Record<string, string>),
+  };
+  if (options?.body && !isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
   const res = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
     ...options,
+    headers,
   });
 
   if (!res.ok) {

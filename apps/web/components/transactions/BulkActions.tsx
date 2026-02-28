@@ -28,14 +28,41 @@ export function BulkActions({
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-[var(--primary)] bg-[var(--primary)]/5 p-3">
-      <span className="text-sm font-medium">
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "10px 14px",
+        borderRadius: "var(--radius)",
+        border: "1px solid var(--border-accent)",
+        background: "var(--accent-glow)",
+      }}
+    >
+      <span
+        style={{
+          fontSize: 13,
+          fontWeight: 500,
+          color: "var(--foreground)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
         {selectedIds.length} selected
       </span>
       <select
         value={categoryId}
         onChange={(e) => setCategoryId(e.target.value)}
-        className="h-8 rounded-md border border-[var(--border)] bg-[var(--background)] px-2 text-sm"
+        style={{
+          height: 32,
+          padding: "0 10px",
+          fontSize: 13,
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius)",
+          color: "var(--foreground)",
+          outline: "none",
+          width: 180,
+        }}
       >
         <option value="">Assign category...</option>
         {categories.map((cat) => (

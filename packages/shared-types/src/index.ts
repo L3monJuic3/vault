@@ -123,6 +123,28 @@ export interface AccountRead {
   created_at: string;
 }
 
+export interface AccountUpdate {
+  name?: string;
+  provider?: string;
+  current_balance?: number;
+  is_active?: boolean;
+}
+
+export interface ImportRead {
+  id: string;
+  user_id: string;
+  account_id: string;
+  filename: string;
+  file_type: string;
+  row_count: number;
+  duplicates_skipped: number;
+  date_range_start: string | null;
+  date_range_end: string | null;
+  status: string;
+  error_message: string | null;
+  created_at: string;
+}
+
 export interface BulkCategoryRequest {
   transaction_ids: string[];
   category_id: string;

@@ -77,9 +77,9 @@ async def get_transactions(
     if has_more:
         items = items[:limit]
 
-    next_cursor = items[-1].id if has_more and items else None
+    next_cursor: UUID | None = UUID(str(items[-1].id)) if has_more and items else None
 
-    return items, next_cursor, has_more
+    return items, next_cursor, has_more  # type: ignore[return-value]
 
 
 async def get_transaction_by_id(
@@ -119,7 +119,7 @@ async def bulk_update_category(
     for txn_id in transaction_ids:
         txn = await get_transaction_by_id(db, txn_id, user_id)
         if txn is not None:
-            txn.category_id = category_id
+            txn.category_id = category_id  # type: ignore[assignment]
             count += 1
     await db.flush()
     return count

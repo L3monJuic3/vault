@@ -10,6 +10,7 @@ import type {
 
 export function useSubscriptions() {
   return useQuery<SubscriptionListResponse>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["subscriptions"],
     queryFn: () => apiFetch("/api/v1/subscriptions"),
   });

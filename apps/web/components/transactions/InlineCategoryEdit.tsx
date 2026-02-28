@@ -24,7 +24,16 @@ export function InlineCategoryEdit({
         else onCancel();
       }}
       onBlur={onCancel}
-      className="h-8 rounded-md border border-[var(--ring)] bg-[var(--background)] px-2 text-sm focus:outline-none"
+      style={{
+        height: 30,
+        padding: "0 8px",
+        fontSize: 12,
+        background: "var(--background)",
+        border: "1px solid var(--accent)",
+        borderRadius: "var(--radius)",
+        color: "var(--foreground)",
+        outline: "none",
+      }}
     >
       <option value="">Select...</option>
       {categories.map((cat) => (

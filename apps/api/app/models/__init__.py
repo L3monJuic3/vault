@@ -9,6 +9,7 @@ from app.models.recurring_group import (
     Frequency,
     RecurringStatus,
 )
+from app.models.insight import Insight
 
 __all__ = [
     "Base",
@@ -22,4 +23,5 @@ __all__ = [
     "RecurringType",
     "Frequency",
     "RecurringStatus",
+    "Insight",
 ]

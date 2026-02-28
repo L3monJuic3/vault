@@ -146,24 +146,38 @@ async def seed_demo_data() -> None:
         # ------------------------------------------------------------------
         # Idempotency: bail out if the demo user already exists
         # ------------------------------------------------------------------
-        result = await db.execute(select(User).where(User.email == "demo@vault.local"))
-        if result.scalar_one_or_none() is not None:
-            print("Demo data already seeded — skipping.")
-            await engine.dispose()
-            return
-
-        # ------------------------------------------------------------------
-        # 1. Create demo user
-        # ------------------------------------------------------------------
-        user = User(
-            id=uuid.uuid4(),
-            email="demo@vault.local",
-            name="Demo User",
-            password_hash=hash_password("demo123"),
-            currency="GBP",
+        result = await db.execute(
+            select(User).where(User.email == "default@vault.local")
         )
-        db.add(user)
-        await db.flush()
+        existing_user = result.scalar_one_or_none()
+        if existing_user is not None:
+            # Check if demo data was already seeded (user has transactions)
+            from sqlalchemy import func
+            from app.models.account import Account as AccountModel
+
+            tx_count = await db.execute(
+                select(func.count(Transaction.id))
+                .join(AccountModel, Transaction.account_id == AccountModel.id)
+                .where(AccountModel.user_id == existing_user.id)
+            )
+            if tx_count.scalar() > 0:
+                print("Demo data already seeded — skipping.")
+                await engine.dispose()
+                return
+            user = existing_user
+        else:
+            # ------------------------------------------------------------------
+            # 1. Create default user (normally auto-created by auth middleware)
+            # ------------------------------------------------------------------
+            user = User(
+                id=uuid.uuid4(),
+                email="default@vault.local",
+                name="Default User",
+                password_hash=hash_password("demo123"),
+                currency="GBP",
+            )
+            db.add(user)
+            await db.flush()
 
         # ------------------------------------------------------------------
         # 2. Create accounts
