@@ -43,6 +43,8 @@ export function AppearanceTab() {
             return (
               <button
                 key={m.value}
+                aria-pressed={isSelected}
+                aria-label={`${m.label} theme`}
                 onClick={() => setMode(m.value)}
                 className={cn(
                   "flex flex-col items-center gap-2 rounded-[var(--radius)] border p-4 transition-all duration-150 cursor-pointer",
@@ -84,8 +86,9 @@ export function AppearanceTab() {
             return (
               <button
                 key={a.value}
+                aria-pressed={isSelected}
+                aria-label={`${a.label} accent colour`}
                 onClick={() => setAccent(a.value)}
-                title={a.label}
                 className={cn(
                   "relative h-8 w-8 cursor-pointer rounded-full border-0 transition-all duration-150",
                   isSelected &&

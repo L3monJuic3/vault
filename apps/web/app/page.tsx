@@ -43,27 +43,16 @@ export default function DashboardPage() {
 
       {/* Charts row: SpendTimeline (1fr) + CategoryChart (340px) */}
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 340px",
-          gap: 16,
-          marginBottom: 16,
-        }}
-        className="max-lg:grid-cols-1"
+        style={{ marginBottom: 16 }}
+        className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4"
       >
         <SpendTimeline />
         <CategoryChart />
       </div>
 
       {/* Bottom row: RecentTransactions (1fr) + TopMerchants (340px) */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 340px",
-          gap: 16,
-        }}
-        className="max-lg:grid-cols-1"
-      >
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
+
         <RecentTransactions />
         <TopMerchants />
       </div>
