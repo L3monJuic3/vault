@@ -7,20 +7,22 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants = {
   default:
-    "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90",
+    "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[var(--shadow-xs)] hover:bg-[var(--primary-hover)] active:scale-[0.98]",
   secondary:
-    "bg-[var(--muted)] text-[var(--foreground)] hover:opacity-80",
+    "bg-[var(--muted)] text-[var(--foreground)] hover:bg-[var(--surface-raised)] active:scale-[0.98]",
   outline:
-    "border border-[var(--border)] bg-transparent hover:bg-[var(--muted)]",
-  ghost: "hover:bg-[var(--muted)]",
-  destructive: "bg-[var(--destructive)] text-white hover:opacity-90",
+    "border border-[var(--border)] bg-transparent hover:bg-[var(--muted)] hover:border-[var(--foreground-subtle)] active:scale-[0.98]",
+  ghost:
+    "hover:bg-[var(--muted)] active:scale-[0.98]",
+  destructive:
+    "bg-[var(--destructive)] text-white shadow-[var(--shadow-xs)] hover:brightness-110 active:scale-[0.98]",
 };
 
 const sizes = {
-  default: "h-10 px-4 py-2",
-  sm: "h-8 px-3 text-sm",
-  lg: "h-12 px-6 text-lg",
-  icon: "h-10 w-10",
+  default: "h-9 px-4 py-2",
+  sm: "h-8 px-3 text-xs",
+  lg: "h-11 px-6",
+  icon: "h-9 w-9",
 };
 
 export function Button({
@@ -32,8 +34,9 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center rounded-md font-medium transition-colors duration-150",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+        "inline-flex items-center justify-center gap-2 rounded-[var(--radius)] text-sm font-medium",
+        "transition-all duration-150 ease-out",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--background)]",
         "disabled:pointer-events-none disabled:opacity-50",
         variants[variant],
         sizes[size],

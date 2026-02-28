@@ -2,14 +2,17 @@ import { cn } from "@/lib/utils";
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  interactive?: boolean;
 }
 
-export function Card({ className, children, ...props }: CardProps) {
+export function Card({ className, children, interactive, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-lg border border-[var(--card-border)] bg-[var(--card)] text-[var(--card-foreground)]",
-        "shadow-[var(--card-shadow)]",
+        "rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card)] text-[var(--card-foreground)]",
+        "shadow-[var(--card-shadow)] transition-all duration-200 ease-out",
+        interactive &&
+          "cursor-pointer hover:shadow-[var(--card-shadow-hover)] hover:border-[var(--foreground-subtle)]/30",
         className,
       )}
       {...props}
@@ -23,9 +26,9 @@ export function CardHeader({
   className,
   children,
   ...props
-}: CardProps) {
+}: React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode }) {
   return (
-    <div className={cn("flex flex-col space-y-1.5 p-6", className)} {...props}>
+    <div className={cn("flex flex-col space-y-1.5 p-5", className)} {...props}>
       {children}
     </div>
   );
@@ -39,7 +42,7 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        "text-lg font-semibold leading-none tracking-tight",
+        "text-sm font-semibold leading-none tracking-tight",
         className,
       )}
       {...props}
@@ -53,9 +56,9 @@ export function CardContent({
   className,
   children,
   ...props
-}: CardProps) {
+}: React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode }) {
   return (
-    <div className={cn("p-6 pt-0", className)} {...props}>
+    <div className={cn("px-5 pb-5 pt-0", className)} {...props}>
       {children}
     </div>
   );
