@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowRight } from "lucide-react";
 import { useTransactions } from "@/hooks/use-transactions";
 
 function formatCurrency(amount: number): string {
@@ -25,16 +24,23 @@ export function RecentTransactions() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "var(--space-5)",
+        }}
+      >
+        <div className="label" style={{ marginBottom: 16 }}>
+          Recent Transactions
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <div className="skeleton" key={i} style={{ height: 40, width: "100%" }} />
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -42,55 +48,130 @@ export function RecentTransactions() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.2 }}
     >
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recent Transactions</CardTitle>
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "var(--space-5)",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+          }}
+        >
+          <span className="label">Recent Transactions</span>
           <Link
             href="/transactions"
-            className="text-sm text-[var(--primary)] hover:underline"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              fontSize: 12,
+              color: "var(--accent)",
+              textDecoration: "none",
+              transition: "opacity 0.12s ease",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.8"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
           >
-            View all
+            View all <ArrowRight size={12} />
           </Link>
-        </CardHeader>
-        <CardContent>
-          {!transactions.length ? (
-            <p className="py-4 text-center text-[var(--muted-foreground)]">
-              No transactions yet
-            </p>
-          ) : (
-            <div className="space-y-1">
-              {transactions.map((txn) => (
+        </div>
+
+        {/* Rows */}
+        {!transactions.length ? (
+          <p
+            style={{
+              textAlign: "center",
+              padding: "24px 0",
+              fontSize: 13,
+              color: "var(--foreground-muted)",
+            }}
+          >
+            No transactions yet
+          </p>
+        ) : (
+          <div>
+            {transactions.map((txn) => (
+              <div
+                key={txn.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 8px",
+                  borderRadius: "var(--radius)",
+                  transition: "background 0.12s ease",
+                  cursor: "default",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--surface-raised)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
                 <div
-                  key={txn.id}
-                  className="flex items-center justify-between rounded-[var(--radius)] px-2.5 py-2.5 transition-all duration-150 hover:bg-[var(--surface-raised)] hover:pl-3.5"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    overflow: "hidden",
+                    flex: 1,
+                    minWidth: 0,
+                  }}
                 >
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <span className="shrink-0 text-xs text-[var(--muted-foreground)]">
-                      {formatDate(txn.date)}
-                    </span>
-                    <span className="truncate text-sm">
-                      {txn.merchant_name || txn.description}
-                    </span>
-                  </div>
                   <span
-                    className={`shrink-0 font-mono text-sm font-medium tabular-nums ${
-                      txn.amount >= 0
-                        ? "text-[var(--success)]"
-                        : "text-[var(--foreground)]"
-                    }`}
+                    style={{
+                      fontSize: 11,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--foreground-muted)",
+                      flexShrink: 0,
+                      width: 48,
+                    }}
                   >
-                    {formatCurrency(txn.amount)}
+                    {formatDate(txn.date)}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 13,
+                      color: "var(--foreground)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {txn.merchant_name || txn.description}
                   </span>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    flexShrink: 0,
+                    color: txn.amount >= 0 ? "var(--income)" : "var(--foreground)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {txn.amount >= 0 ? "+" : ""}
+                  {formatCurrency(txn.amount)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }

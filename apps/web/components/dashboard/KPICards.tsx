@@ -1,7 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useCountUp } from "@/hooks/use-count-up";
 import { Wallet, TrendingUp, TrendingDown, CreditCard } from "lucide-react";
 import type { DashboardStats } from "@vault/shared-types";
@@ -23,80 +21,113 @@ const kpiConfig = [
     key: "total_balance" as const,
     label: "Total Balance",
     Icon: Wallet,
-    colorClass: "text-[var(--foreground)]",
-    iconColor: "text-[var(--foreground-muted)]",
+    valueColor: "var(--foreground)",
+    iconColor: "var(--foreground-muted)",
+    accent: true,
   },
   {
     key: "monthly_income" as const,
     label: "Monthly Income",
     Icon: TrendingUp,
-    colorClass: "text-[var(--success)]",
-    iconColor: "text-[var(--success)]",
+    valueColor: "var(--income)",
+    iconColor: "var(--income)",
+    accent: false,
   },
   {
     key: "monthly_spending" as const,
     label: "Monthly Spending",
     Icon: TrendingDown,
-    colorClass: "text-[var(--destructive)]",
-    iconColor: "text-[var(--destructive)]",
+    valueColor: "var(--spending)",
+    iconColor: "var(--spending)",
+    accent: false,
   },
   {
     key: "subscription_total" as const,
     label: "Subscriptions",
     Icon: CreditCard,
-    colorClass: "text-[var(--primary)]",
-    iconColor: "text-[var(--primary)]",
+    valueColor: "var(--accent)",
+    iconColor: "var(--accent)",
+    accent: false,
   },
 ];
 
 function AnimatedValue({
   value,
-  colorClass,
+  color,
 }: {
   value: number;
-  colorClass: string;
+  color: string;
 }) {
   const animated = useCountUp(value, 800);
-
   return (
-    <p className={`mt-2 text-xl font-bold font-mono ${colorClass}`}>
+    <span className="mono-lg" style={{ color }}>
       {formatCurrency(animated)}
-    </p>
+    </span>
+  );
+}
+
+function KPISkeleton() {
+  return (
+    <div
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-lg)",
+        padding: "var(--space-5)",
+      }}
+    >
+      <div className="skeleton" style={{ width: 80, height: 12, marginBottom: 16 }} />
+      <div className="skeleton" style={{ width: 140, height: 32 }} />
+    </div>
   );
 }
 
 export function KPICards({ stats, isLoading }: KPICardsProps) {
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <KPISkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {kpiConfig.map((kpi, index) => (
-        <Card
+        <div
           key={kpi.key}
-          interactive
-          className={`animate-fade-in-up stagger-${index + 1}`}
+          className={`animate-card-enter stagger-${index + 1}`}
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-lg)",
+            padding: "var(--space-5)",
+            transition: "all 0.15s ease",
+            ...(kpi.accent ? { boxShadow: "var(--shadow-glow)" } : {}),
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "var(--border-hover)";
+            e.currentTarget.style.transform = "translateY(-1px)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "";
+            e.currentTarget.style.transform = "";
+          }}
         >
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-[var(--muted-foreground)]">
-                {kpi.label}
-              </p>
-              <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)]">
-                <kpi.Icon size={18} className={kpi.iconColor} />
-              </div>
-            </div>
-            {isLoading ? (
-              <Skeleton className="mt-2 h-8 w-24" />
-            ) : stats ? (
-              <AnimatedValue
-                value={stats[kpi.key]}
-                colorClass={kpi.colorClass}
-              />
-            ) : (
-              <p className={`mt-2 text-xl font-bold font-mono ${kpi.colorClass}`}>
-                &mdash;
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+            <span className="label">{kpi.label}</span>
+            <kpi.Icon size={16} style={{ color: kpi.iconColor }} />
+          </div>
+          {stats ? (
+            <AnimatedValue value={stats[kpi.key]} color={kpi.valueColor} />
+          ) : (
+            <span className="mono-lg" style={{ color: kpi.valueColor }}>
+              &mdash;
+            </span>
+          )}
+        </div>
       ))}
     </div>
   );

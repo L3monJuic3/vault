@@ -11,8 +11,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { motion } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useSpendTimeline } from "@/hooks/use-dashboard";
 
 type Granularity = "daily" | "weekly" | "monthly";
@@ -45,27 +43,51 @@ interface CustomTooltipProps {
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 shadow-md">
-      <p className="mb-1 text-sm font-medium">{label}</p>
+    <div
+      style={{
+        background: "var(--surface-raised)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius)",
+        padding: "10px 14px",
+        boxShadow: "var(--shadow-md)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: 12,
+          color: "var(--foreground-muted)",
+          marginBottom: 6,
+          fontFamily: "var(--font-mono)",
+        }}
+      >
+        {label}
+      </p>
       {payload.map((entry) => (
         <p
           key={entry.dataKey}
-          className="text-sm"
           style={{
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: "var(--font-mono)",
             color:
               entry.dataKey === "income"
-                ? "var(--success)"
-                : entry.dataKey === "spending"
-                  ? "var(--destructive)"
-                  : "var(--primary)",
+                ? "var(--income)"
+                : "var(--spending)",
           }}
         >
-          {entry.dataKey}: {formatCurrency(entry.value)}
+          {entry.dataKey === "income" ? "+" : ""}
+          {formatCurrency(entry.value)}
         </p>
       ))}
     </div>
   );
 }
+
+const granularityOptions: { value: Granularity; label: string }[] = [
+  { value: "daily", label: "D" },
+  { value: "weekly", label: "W" },
+  { value: "monthly", label: "M" },
+];
 
 export function SpendTimeline() {
   const [granularity, setGranularity] = useState<Granularity>("monthly");
@@ -73,14 +95,17 @@ export function SpendTimeline() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Spend Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-64 w-full" />
-        </CardContent>
-      </Card>
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "var(--space-5)",
+        }}
+      >
+        <div className="label" style={{ marginBottom: 16 }}>Spend Timeline</div>
+        <div className="skeleton" style={{ width: "100%", height: 280 }} />
+      </div>
     );
   }
 
@@ -91,62 +116,130 @@ export function SpendTimeline() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
     >
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Spend Timeline</CardTitle>
-          <select
-            value={granularity}
-            onChange={(e) => setGranularity(e.target.value as Granularity)}
-            className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "var(--space-5)",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <span className="label">Spend Timeline</span>
+          <div style={{ display: "flex", gap: 2 }}>
+            {granularityOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setGranularity(opt.value)}
+                style={{
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  fontFamily: "var(--font-mono)",
+                  borderRadius: "var(--radius-sm)",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.12s ease",
+                  background:
+                    granularity === opt.value
+                      ? "var(--accent-muted)"
+                      : "transparent",
+                  color:
+                    granularity === opt.value
+                      ? "var(--accent)"
+                      : "var(--foreground-muted)",
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Chart */}
+        {!chartData.length ? (
+          <p
+            style={{
+              textAlign: "center",
+              padding: "40px 0",
+              fontSize: 13,
+              color: "var(--foreground-muted)",
+            }}
           >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </CardHeader>
-        <CardContent>
-          {!chartData.length ? (
-            <p className="py-8 text-center text-[var(--muted-foreground)]">
-              No timeline data yet
-            </p>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis
-                  dataKey="dateLabel"
-                  tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                  tickFormatter={(v: number) => formatCurrency(v)}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="income"
-                  stackId="1"
-                  stroke="var(--success)"
-                  fill="var(--success)"
-                  fillOpacity={0.3}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="spending"
-                  stackId="2"
-                  stroke="var(--destructive)"
-                  fill="var(--destructive)"
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
+            No timeline data yet
+          </p>
+        ) : (
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--income)" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="var(--income)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="spendingGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--spending)" stopOpacity={0.2} />
+                  <stop offset="100%" stopColor="var(--spending)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--border)"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="dateLabel"
+                tick={{
+                  fontSize: 11,
+                  fill: "var(--foreground-muted)",
+                  fontFamily: "var(--font-mono)",
+                }}
+                axisLine={{ stroke: "var(--border)" }}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{
+                  fontSize: 11,
+                  fill: "var(--foreground-muted)",
+                  fontFamily: "var(--font-mono)",
+                }}
+                tickFormatter={(v: number) => `£${(v / 1000).toFixed(0)}k`}
+                axisLine={false}
+                tickLine={false}
+                width={45}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="income"
+                stackId="1"
+                stroke="var(--income)"
+                strokeWidth={1.5}
+                fill="url(#incomeGrad)"
+              />
+              <Area
+                type="monotone"
+                dataKey="spending"
+                stackId="2"
+                stroke="var(--spending)"
+                strokeWidth={1.5}
+                fill="url(#spendingGrad)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
     </motion.div>
   );
 }
