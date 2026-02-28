@@ -19,6 +19,7 @@ def detect_format(filename: str, content: str) -> str | None:
     Returns: 'amex' | 'hsbc' | 'monzo' | 'starling' | None
     """
     first_line = content.split("\n")[0].lower()
+    fname = filename.lower()
 
     # Monzo: has "Notes and `#tags`" or "Money Out" columns
     if "notes and" in first_line or "money out" in first_line:
@@ -37,12 +38,14 @@ def detect_format(filename: str, content: str) -> str | None:
     if "balance" in first_line and "date" in first_line:
         return "hsbc"
 
-    # Amex: Date,Description,Amount (no balance, no paid out/in)
+    # Amex/HSBC ambiguity: both can have Date,Description,Amount headers.
+    # Use filename to disambiguate; default to Amex (never has Balance column).
     if "date" in first_line and "description" in first_line and "amount" in first_line:
+        if "hsbc" in fname:
+            return "hsbc"
         return "amex"
 
     # Filename hints as fallback
-    fname = filename.lower()
     if "monzo" in fname:
         return "monzo"
     if "starling" in fname:
