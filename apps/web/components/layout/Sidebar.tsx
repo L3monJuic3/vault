@@ -11,13 +11,15 @@ import {
   Bug,
   Landmark,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
+const MAIN_NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/upload", label: "Upload", icon: Upload },
   { href: "/transactions", label: "Transactions", icon: List },
   { href: "/subscriptions", label: "Subscriptions", icon: RefreshCcw },
+];
+
+const SYSTEM_NAV = [
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/debug", label: "Debug", icon: Bug },
 ];
@@ -26,55 +28,163 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-[220px] flex-shrink-0 flex-col border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] max-md:hidden">
+    <aside
+      className="max-md:hidden"
+      style={{
+        width: 220,
+        flexShrink: 0,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: "var(--sidebar-bg)",
+        borderRight: "1px solid var(--sidebar-border)",
+        position: "sticky",
+        top: 0,
+      }}
+    >
       {/* Logo */}
-      <div className="border-b border-[var(--sidebar-border)] px-4 py-5">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)]">
-            <Landmark size={14} className="text-white" />
-          </div>
-          <span className="font-mono text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
-            vault
-          </span>
+      <div
+        style={{
+          padding: "20px 16px 16px",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "var(--radius)",
+            background: "var(--accent)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <Landmark size={14} color="#fff" />
         </div>
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 15,
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            color: "var(--foreground)",
+          }}
+        >
+          vault
+        </span>
       </div>
 
-      {/* Nav items */}
-      <nav className="flex-1 space-y-0.5 px-2.5 py-3">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive =
-            href === "/" ? pathname === "/" : pathname.startsWith(href);
+      {/* Main nav group */}
+      <nav style={{ flex: 1, padding: "4px 8px" }}>
+        <div
+          className="label"
+          style={{ padding: "8px 12px 6px", marginBottom: 2 }}
+        >
+          Menu
+        </div>
+        {MAIN_NAV.map((item) => (
+          <NavItem key={item.href} {...item} pathname={pathname} />
+        ))}
 
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-2.5 rounded-[var(--radius)] px-3 py-2 text-[13px] no-underline transition-all duration-150",
-                isActive
-                  ? "bg-[var(--sidebar-item-active)] font-medium text-[var(--foreground)]"
-                  : "text-[var(--foreground-muted)] hover:bg-[var(--sidebar-item-hover)] hover:text-[var(--foreground)]",
-              )}
-            >
-              <Icon
-                size={16}
-                className={cn(
-                  "flex-shrink-0",
-                  isActive
-                    ? "text-[var(--primary)]"
-                    : "text-[var(--foreground-subtle)]",
-                )}
-              />
-              {label}
-            </Link>
-          );
-        })}
+        {/* System nav group */}
+        <div
+          className="label"
+          style={{ padding: "20px 12px 6px", marginBottom: 2 }}
+        >
+          System
+        </div>
+        {SYSTEM_NAV.map((item) => (
+          <NavItem key={item.href} {...item} pathname={pathname} />
+        ))}
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[var(--sidebar-border)] px-4 py-3 font-mono text-[11px] text-[var(--foreground-subtle)]">
+      <div
+        style={{
+          padding: "12px 16px",
+          borderTop: "1px solid var(--sidebar-border)",
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          color: "var(--foreground-muted)",
+        }}
+      >
         v0.1.0
       </div>
     </aside>
+  );
+}
+
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  pathname,
+}: {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  pathname: string;
+}) {
+  const isActive =
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  return (
+    <Link
+      href={href}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 12px",
+        borderRadius: "var(--radius)",
+        fontSize: 13,
+        fontWeight: isActive ? 500 : 400,
+        textDecoration: "none",
+        transition: "all 0.12s ease",
+        position: "relative",
+        color: isActive ? "var(--foreground)" : "var(--foreground-secondary)",
+        background: isActive ? "var(--sidebar-item-active)" : "transparent",
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.background = "var(--sidebar-item-hover)";
+          e.currentTarget.style.color = "var(--foreground)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = "var(--foreground-secondary)";
+        }
+      }}
+    >
+      {/* Active accent bar */}
+      {isActive && (
+        <span
+          style={{
+            position: "absolute",
+            left: 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 3,
+            height: 16,
+            borderRadius: "0 2px 2px 0",
+            background: "var(--sidebar-accent)",
+          }}
+        />
+      )}
+      <Icon
+        size={16}
+        style={{
+          flexShrink: 0,
+          color: isActive ? "var(--accent)" : "var(--foreground-muted)",
+        }}
+      />
+      {label}
+    </Link>
   );
 }
