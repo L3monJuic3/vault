@@ -24,21 +24,9 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
-          <div
-            style={{
-              display: "flex",
-              minHeight: "100vh",
-              background: "var(--background)",
-            }}
-          >
+          <div className="flex min-h-screen bg-[var(--background)]">
             <Sidebar />
-            <main
-              style={{
-                flex: 1,
-                minWidth: 0,
-                overflowX: "hidden",
-              }}
-            >
+            <main className="min-w-0 flex-1 overflow-x-hidden">
               {children}
             </main>
           </div>
