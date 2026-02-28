@@ -149,7 +149,7 @@ async def run_subscription_detection(
     transactions = list(result.scalars().all())
 
     # Run detection
-    groups = await detect_subscriptions(db, user.id, transactions)
+    groups = await detect_subscriptions(db, user.id, transactions)  # type: ignore[arg-type]
     await db.commit()
 
     return {

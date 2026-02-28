@@ -91,7 +91,7 @@ async def detect_subscriptions(
 
         # Detect frequency
         dates: list[date] = [
-            txn.date.date() if isinstance(txn.date, datetime) else txn.date
+            txn.date.date() if isinstance(txn.date, datetime) else txn.date  # type: ignore[misc]
             for txn in txns
         ]
         frequency = _detect_frequency(dates)

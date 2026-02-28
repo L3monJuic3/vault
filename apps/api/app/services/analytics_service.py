@@ -64,13 +64,13 @@ async def get_dashboard_stats(db: AsyncSession, user_id: UUID) -> dict:
     for sub in subscriptions:
         amount = sub.estimated_amount or Decimal("0")
         if sub.frequency == "weekly":
-            subscription_total += amount * 52 / 12
+            subscription_total += amount * 52 / 12  # type: ignore[assignment]
         elif sub.frequency == "monthly":
-            subscription_total += amount
+            subscription_total += amount  # type: ignore[assignment]
         elif sub.frequency == "quarterly":
-            subscription_total += amount / 3
+            subscription_total += amount / 3  # type: ignore[assignment]
         elif sub.frequency == "annual":
-            subscription_total += amount / 12
+            subscription_total += amount / 12  # type: ignore[assignment]
 
     return {
         "total_balance": float(total_balance),

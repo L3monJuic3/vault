@@ -22,7 +22,7 @@ async def dashboard_stats(
     user: User = Depends(get_current_user),
 ):
     """KPI stats: total balance, monthly income/spending, subscription total."""
-    return await get_dashboard_stats(db, user.id)
+    return await get_dashboard_stats(db, user.id)  # type: ignore[arg-type]
 
 
 @router.get("/categories")
@@ -34,7 +34,7 @@ async def category_breakdown(
 ):
     """Spending breakdown by category."""
     return await get_category_breakdown(
-        db, user.id, date_from=date_from, date_to=date_to
+        db, user.id, date_from=date_from, date_to=date_to  # type: ignore[arg-type]
     )
 
 
@@ -48,7 +48,7 @@ async def spend_timeline(
 ):
     """Income and spending over time, grouped by granularity."""
     return await get_spend_timeline(
-        db, user.id, granularity=granularity, date_from=date_from, date_to=date_to
+        db, user.id, granularity=granularity, date_from=date_from, date_to=date_to  # type: ignore[arg-type]
     )
 
 
@@ -62,5 +62,5 @@ async def top_merchants(
 ):
     """Top merchants by total spending."""
     return await get_top_merchants(
-        db, user.id, limit=limit, date_from=date_from, date_to=date_to
+        db, user.id, limit=limit, date_from=date_from, date_to=date_to  # type: ignore[arg-type]
     )

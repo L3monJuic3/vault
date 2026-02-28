@@ -189,7 +189,7 @@ async def process_import(
     duplicates = 0
 
     for row in rows:
-        h = _txn_hash(account.id, row["date"], row["amount"], row["description"])
+        h = _txn_hash(account.id, row["date"], row["amount"], row["description"])  # type: ignore[arg-type]
         if h in existing_hashes:
             duplicates += 1
             continue
@@ -220,13 +220,13 @@ async def process_import(
     dates = [t.date for t in new_transactions]
     import_record.row_count = len(new_transactions)  # type: ignore[assignment]
     import_record.duplicates_skipped = duplicates  # type: ignore[assignment]
-    import_record.status = "completed"
+    import_record.status = "completed"  # type: ignore[assignment]
     if dates:
         import_record.date_range_start = min(
-            d.date() if hasattr(d, "date") else d for d in dates
+            d.date() if hasattr(d, "date") else d for d in dates  # type: ignore[misc]
         )
         import_record.date_range_end = max(
-            d.date() if hasattr(d, "date") else d for d in dates
+            d.date() if hasattr(d, "date") else d for d in dates  # type: ignore[misc]
         )
 
     # Update account balance to most recent balance_after if available
@@ -237,7 +237,7 @@ async def process_import(
     ]
     if balance_rows:
         latest_balance = sorted(balance_rows, key=lambda x: x[0])[-1][1]
-        account.current_balance = latest_balance
+        account.current_balance = latest_balance  # type: ignore[assignment]
 
     await db.commit()
     await db.refresh(import_record)

@@ -65,7 +65,7 @@ async def categorise_transactions(
     batch_size = 30
     for i in range(0, len(uncached), batch_size):
         batch = uncached[i : i + batch_size]
-        batch_results = await _categorise_batch(batch, category_names)
+        batch_results = await _categorise_batch(batch, category_names)  # type: ignore[arg-type]
         results.extend(batch_results)
 
         # Update cache for high-confidence results

@@ -49,7 +49,7 @@ async def upload_statement(
     try:
         import_record, transaction_ids = await process_import(
             db,
-            user_id=user.id,
+            user_id=user.id,  # type: ignore[arg-type]
             filename=file.filename,
             content=content,
         )

@@ -74,9 +74,9 @@ async def update_me(
 ):
     """Update the current user's profile (name, currency)."""
     if body.name is not None:
-        user.name = body.name
+        user.name = body.name  # type: ignore[assignment]
     if body.currency is not None:
-        user.currency = body.currency
+        user.currency = body.currency  # type: ignore[assignment]
     await db.flush()
     await db.refresh(user)
     return user

@@ -23,7 +23,7 @@ async def list_accounts(
     user: User = Depends(get_current_user),
 ):
     """List all accounts for the current user."""
-    accounts = await get_accounts(db, user.id)
+    accounts = await get_accounts(db, user.id)  # type: ignore[arg-type]
     return [AccountRead.model_validate(a) for a in accounts]
 
 
@@ -36,7 +36,7 @@ async def create_new_account(
     """Create a new account."""
     account = await create_account(
         db,
-        user.id,
+        user.id,  # type: ignore[arg-type]
         name=body.name,
         type=body.type,
         provider=body.provider,
@@ -58,7 +58,7 @@ async def update_existing_account(
     account = await update_account(
         db,
         account_id,
-        user.id,
+        user.id,  # type: ignore[arg-type]
         **body.model_dump(exclude_unset=True),
     )
     if account is None:
@@ -77,7 +77,7 @@ async def archive_existing_account(
     user: User = Depends(get_current_user),
 ):
     """Archive an account (soft delete — sets is_active=False)."""
-    account = await archive_account(db, account_id, user.id)
+    account = await archive_account(db, account_id, user.id)  # type: ignore[arg-type]
     if account is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

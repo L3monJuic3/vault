@@ -23,7 +23,7 @@ async def list_categories(
     user: User = Depends(get_current_user),
 ):
     """List all categories — system defaults plus user-created."""
-    categories = await get_categories(db, user.id)
+    categories = await get_categories(db, user.id)  # type: ignore[arg-type]
     return [CategoryRead.model_validate(c) for c in categories]
 
 
@@ -36,7 +36,7 @@ async def create_new_category(
     """Create a new user-owned category."""
     category = await create_category(
         db,
-        user.id,
+        user.id,  # type: ignore[arg-type]
         name=body.name,
         icon=body.icon,
         colour=body.colour,
@@ -58,7 +58,7 @@ async def update_existing_category(
     category = await update_category(
         db,
         category_id,
-        user.id,
+        user.id,  # type: ignore[arg-type]
         **body.model_dump(exclude_unset=True),
     )
     if category is None:
@@ -77,7 +77,7 @@ async def delete_existing_category(
     user: User = Depends(get_current_user),
 ):
     """Delete a user-owned category. System categories cannot be deleted."""
-    deleted = await delete_category(db, category_id, user.id)
+    deleted = await delete_category(db, category_id, user.id)  # type: ignore[arg-type]
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

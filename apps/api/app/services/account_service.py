@@ -68,6 +68,6 @@ async def archive_account(
     account = await get_account_by_id(db, account_id, user_id)
     if account is None:
         return None
-    account.is_active = False
+    account.is_active = False  # type: ignore[assignment]
     await db.flush()
     return account
