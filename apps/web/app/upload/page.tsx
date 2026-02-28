@@ -2,8 +2,10 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, PageWrapper, PageHeader } from "@/components/ui";
 import { Button } from "@/components/ui/button";
+import { Upload as UploadIcon, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type UploadStatus = "idle" | "dragging" | "file" | "uploading" | "success" | "error";
 
@@ -34,24 +36,10 @@ function UploadProgress() {
   }, []);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "4px",
-        background: "var(--border)",
-        borderRadius: "2px",
-        overflow: "hidden",
-        marginTop: "16px",
-      }}
-    >
+    <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-[var(--border)]">
       <div
-        style={{
-          height: "100%",
-          width: `${Math.min(progress, 95)}%`,
-          background: "var(--primary)",
-          borderRadius: "2px",
-          transition: "width 0.15s var(--transition-snappy)",
-        }}
+        className="h-full rounded-full bg-[var(--primary)] transition-all duration-150"
+        style={{ width: `${Math.min(progress, 95)}%` }}
       />
     </div>
   );
@@ -64,7 +52,7 @@ function AnimatedCheckmark() {
       height="48"
       viewBox="0 0 48 48"
       fill="none"
-      style={{ margin: "0 auto 12px" }}
+      className="mx-auto mb-3"
     >
       <circle
         cx="24"
@@ -72,7 +60,7 @@ function AnimatedCheckmark() {
         r="20"
         stroke="var(--success)"
         strokeWidth="2"
-        fill="rgba(16,185,129,0.08)"
+        fill="var(--success-light)"
       />
       <path
         d="M15 24L21 30L33 18"
@@ -152,55 +140,54 @@ export default function UploadPage() {
   const isDragging = status === "dragging";
 
   return (
-    <div className="animate-fade-in-up" style={{ padding: "28px 32px", maxWidth: "800px", margin: "0 auto" }}>
-      <div style={{ marginBottom: "28px" }}>
-        <h1 style={{ fontSize: "20px", fontWeight: 600, color: "var(--foreground)", letterSpacing: "-0.02em" }}>
-          Upload
-        </h1>
-        <p style={{ fontSize: "13px", color: "var(--foreground-muted)", marginTop: "2px" }}>
-          Import a bank statement to get started
-        </p>
-      </div>
+    <PageWrapper maxWidth="md" className="animate-fade-in-up">
+      <PageHeader
+        title="Upload"
+        subtitle="Import a bank statement to get started"
+      />
 
       {status !== "success" && (
         <div
           onDrop={handleDrop}
-          onDragOver={(e) => { e.preventDefault(); setStatus("dragging"); }}
-          onDragLeave={() => setStatus(file ? "file" : "idle")}
-          style={{
-            border: `2px dashed ${isDragging ? "var(--primary)" : "var(--border)"}`,
-            borderRadius: "var(--radius-lg)",
-            background: isDragging ? "rgba(99,102,241,0.05)" : "var(--surface)",
-            padding: "48px 32px",
-            textAlign: "center",
-            transition: "all 0.25s var(--transition-snappy)",
-            marginBottom: "16px",
+          onDragOver={(e) => {
+            e.preventDefault();
+            setStatus("dragging");
           }}
+          onDragLeave={() => setStatus(file ? "file" : "idle")}
+          className={cn(
+            "mb-4 rounded-[var(--radius-lg)] border-2 border-dashed p-12 text-center transition-all duration-200",
+            isDragging
+              ? "border-[var(--primary)] bg-[var(--primary-lighter)]"
+              : "border-[var(--border)] bg-[var(--surface)]",
+          )}
         >
           {!file ? (
             <>
               <div
-                style={{
-                  fontSize: "32px",
-                  marginBottom: "12px",
-                  transition: "transform 0.2s var(--transition-snappy)",
-                  transform: isDragging ? "scale(1.02)" : "none",
-                }}
+                className={cn(
+                  "mb-3 flex justify-center transition-transform duration-200",
+                  isDragging && "scale-110",
+                )}
               >
-                ↑
+                <UploadIcon
+                  size={32}
+                  className="text-[var(--foreground-muted)]"
+                />
               </div>
-              <p style={{ color: "var(--foreground)", fontSize: "15px", marginBottom: "6px" }}>
+              <p className="mb-1 text-[15px] text-[var(--foreground)]">
                 Drag your statement here
               </p>
-              <p style={{ color: "var(--foreground-muted)", fontSize: "13px" }}>
+              <p className="text-[13px] text-[var(--foreground-muted)]">
                 or{" "}
-                <label style={{ color: "var(--primary)", cursor: "pointer", textDecoration: "underline" }}>
+                <label className="cursor-pointer text-[var(--primary)] underline">
                   browse files
                   <input
                     type="file"
                     accept=".csv"
-                    style={{ display: "none" }}
-                    onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                    className="hidden"
+                    onChange={(e) =>
+                      e.target.files?.[0] && handleFile(e.target.files[0])
+                    }
                   />
                 </label>
               </p>
@@ -208,37 +195,15 @@ export default function UploadPage() {
           ) : (
             <div className="animate-fade-in-up">
               {/* File preview card */}
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  background: "var(--surface-raised)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius)",
-                  padding: "12px 16px",
-                  marginBottom: "16px",
-                  textAlign: "left",
-                }}
-              >
-                <div style={{
-                  width: "36px",
-                  height: "36px",
-                  background: "rgba(99,102,241,0.1)",
-                  borderRadius: "var(--radius-sm)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "18px",
-                  flexShrink: 0,
-                }}>
-                  📄
+              <div className="mb-4 inline-flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3 text-left">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary-light)]">
+                  <FileText size={18} className="text-[var(--primary)]" />
                 </div>
                 <div>
-                  <p style={{ color: "var(--foreground)", fontSize: "14px", fontWeight: 500 }}>
+                  <p className="text-sm font-medium text-[var(--foreground)]">
                     {file.name}
                   </p>
-                  <p style={{ color: "var(--foreground-muted)", fontSize: "12px", fontFamily: "var(--font-mono)" }}>
+                  <p className="font-mono text-xs text-[var(--foreground-muted)]">
                     {(file.size / 1024).toFixed(1)} KB
                   </p>
                 </div>
@@ -247,11 +212,15 @@ export default function UploadPage() {
               {isUploading ? (
                 <UploadProgress />
               ) : (
-                <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "8px" }}>
+                <div className="mt-2 flex justify-center gap-2">
                   <Button onClick={handleUpload} disabled={isUploading}>
                     Upload &amp; Process
                   </Button>
-                  <Button variant="outline" onClick={handleReset} disabled={isUploading}>
+                  <Button
+                    variant="outline"
+                    onClick={handleReset}
+                    disabled={isUploading}
+                  >
                     Remove
                   </Button>
                 </div>
@@ -262,56 +231,36 @@ export default function UploadPage() {
       )}
 
       {status === "error" && (
-        <div
-          className="animate-fade-in-up"
-          style={{
-            background: "rgba(239, 68, 68, 0.08)",
-            border: "1px solid rgba(239,68,68,0.3)",
-            borderRadius: "var(--radius)",
-            padding: "12px 16px",
-            marginBottom: "16px",
-            fontSize: "13px",
-            color: "var(--spending)",
-          }}
-        >
+        <div className="animate-fade-in-up mb-4 rounded-[var(--radius)] border border-[var(--destructive)]/30 bg-[var(--destructive-light)] px-4 py-3 text-[13px] text-[var(--destructive)]">
           {errorMessage || "Upload failed. Please try again."}
         </div>
       )}
 
       {status === "success" && result && (
-        <div
-          className="animate-fade-in-up"
-          style={{
-            background: "rgba(16,185,129,0.06)",
-            border: "1px solid rgba(16,185,129,0.2)",
-            borderRadius: "var(--radius-lg)",
-            padding: "32px 24px",
-            marginBottom: "16px",
-            textAlign: "center",
-          }}
-        >
+        <div className="animate-fade-in-up mb-4 rounded-[var(--radius-lg)] border border-[var(--success)]/20 bg-[var(--success-light)] p-8 text-center">
           <AnimatedCheckmark />
-          <p style={{ color: "var(--income)", fontSize: "16px", fontWeight: 600, marginBottom: "12px" }}>
+          <p className="mb-3 text-base font-semibold text-[var(--success)]">
             Upload complete
           </p>
-          <div style={{ display: "flex", gap: "24px", justifyContent: "center", marginBottom: "20px" }}>
-            <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "24px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--foreground)" }}>
+          <div className="mb-5 flex justify-center gap-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold font-mono text-[var(--foreground)]">
                 {result.row_count}
               </p>
-              <p style={{ fontSize: "12px", color: "var(--foreground-muted)" }}>transactions imported</p>
+              <p className="text-hint">transactions imported</p>
             </div>
             {result.duplicates_skipped > 0 && (
-              <div style={{ textAlign: "center" }}>
-                <p style={{ fontSize: "24px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--foreground-muted)" }}>
+              <div className="text-center">
+                <p className="text-2xl font-bold font-mono text-[var(--foreground-muted)]">
                   {result.duplicates_skipped}
                 </p>
-                <p style={{ fontSize: "12px", color: "var(--foreground-muted)" }}>duplicates skipped</p>
+                <p className="text-hint">duplicates skipped</p>
               </div>
             )}
           </div>
-          <p style={{ fontSize: "12px", color: "var(--foreground-muted)", marginBottom: "20px" }}>
-            AI categorisation is running in the background. Dashboard will update shortly.
+          <p className="text-hint mb-5">
+            AI categorisation is running in the background. Dashboard will
+            update shortly.
           </p>
           <Button variant="outline" onClick={handleReset}>
             Upload another
@@ -321,46 +270,62 @@ export default function UploadPage() {
 
       <Card className="animate-fade-in-up stagger-2">
         <CardHeader>
-          <CardTitle style={{ fontSize: "13px" }}>Supported formats</CardTitle>
+          <CardTitle>Supported formats</CardTitle>
         </CardHeader>
         <CardContent>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+          <table className="w-full text-[13px]">
             <thead>
-              <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                <th style={{ textAlign: "left", padding: "6px 0", color: "var(--foreground-muted)", fontWeight: 500 }}>Bank</th>
-                <th style={{ textAlign: "left", padding: "6px 0", color: "var(--foreground-muted)", fontWeight: 500 }}>Format</th>
-                <th style={{ textAlign: "left", padding: "6px 0", color: "var(--foreground-muted)", fontWeight: 500 }}>Status</th>
+              <tr className="border-b border-[var(--border)]">
+                <th className="py-2 text-left text-xs font-medium text-[var(--foreground-muted)]">
+                  Bank
+                </th>
+                <th className="py-2 text-left text-xs font-medium text-[var(--foreground-muted)]">
+                  Format
+                </th>
+                <th className="py-2 text-left text-xs font-medium text-[var(--foreground-muted)]">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {[
-                { bank: "American Express", format: "CSV", status: "✓ Supported" },
-                { bank: "HSBC", format: "CSV", status: "✓ Supported" },
-                { bank: "Monzo", format: "CSV", status: "✓ Supported" },
-                { bank: "Starling", format: "CSV", status: "✓ Supported" },
+                { bank: "American Express", format: "CSV", status: "Supported" },
+                { bank: "HSBC", format: "CSV", status: "Supported" },
+                { bank: "Monzo", format: "CSV", status: "Supported" },
+                { bank: "Starling", format: "CSV", status: "Supported" },
               ].map((row) => (
-                <tr key={row.bank} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "8px 0", color: "var(--foreground)" }}>{row.bank}</td>
-                  <td style={{ padding: "8px 0" }}>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", background: "var(--surface-raised)", padding: "2px 6px", borderRadius: "3px", color: "var(--foreground-muted)" }}>
+                <tr
+                  key={row.bank}
+                  className="border-b border-[var(--border)]"
+                >
+                  <td className="py-2 text-sm text-[var(--foreground)]">
+                    {row.bank}
+                  </td>
+                  <td className="py-2">
+                    <span className="rounded-[var(--radius-sm)] bg-[var(--surface-raised)] px-1.5 py-0.5 font-mono text-xs text-[var(--foreground-muted)]">
                       {row.format}
                     </span>
                   </td>
-                  <td style={{ padding: "8px 0", color: row.status.startsWith("✓") ? "var(--income)" : "var(--foreground-subtle)", fontSize: "12px" }}>
+                  <td className="py-2 text-xs text-[var(--success)]">
                     {row.status}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p style={{ fontSize: "12px", color: "var(--foreground-muted)", marginTop: "12px" }}>
+          <p className="mt-3 text-hint">
             Using a different bank?{" "}
-            <a href="https://github.com/L3monJuic3/vault" target="_blank" rel="noreferrer" style={{ color: "var(--primary)" }}>
-              Contribute a parser on GitHub →
+            <a
+              href="https://github.com/L3monJuic3/vault"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[var(--primary)] hover:underline"
+            >
+              Contribute a parser on GitHub
             </a>
           </p>
         </CardContent>
       </Card>
-    </div>
+    </PageWrapper>
   );
 }
