@@ -136,12 +136,30 @@ function LogRow({
 }) {
   return (
     <div
+      role={log.detail ? "button" : undefined}
+      tabIndex={log.detail ? 0 : undefined}
+      aria-expanded={log.detail ? expanded : undefined}
+      aria-label={
+        log.detail
+          ? `Log entry: ${log.level} — click to ${expanded ? "collapse" : "expand"}`
+          : undefined
+      }
       style={{
         borderBottom: "1px solid var(--border)",
         cursor: log.detail ? "pointer" : "default",
         transition: "background 0.1s ease",
       }}
       onClick={log.detail ? onToggle : undefined}
+      onKeyDown={
+        log.detail
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onToggle();
+              }
+            }
+          : undefined
+      }
       onMouseEnter={(e) => {
         if (log.detail) e.currentTarget.style.background = "var(--surface-raised)";
       }}
@@ -235,6 +253,7 @@ export default function DebugPage() {
     level: levelFilter === "ALL" ? undefined : levelFilter,
     category: categoryFilter === "ALL" ? undefined : categoryFilter,
     limit: 200,
+    autoRefresh,
   });
   const clearLogs = useClearLogs();
   const testLog = useTestLog();

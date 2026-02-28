@@ -8,9 +8,12 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 API_URL="${API_URL:-http://localhost:8000}"
-SCHEMA_PATH="packages/shared-types/openapi.json"
-OUTPUT_PATH="packages/shared-types/src/generated.ts"
+SCHEMA_PATH="$REPO_ROOT/packages/shared-types/openapi.json"
+OUTPUT_PATH="$REPO_ROOT/packages/shared-types/src/generated.ts"
 
 echo "=== Vault Type Generation ==="
 
@@ -31,8 +34,8 @@ fi
 
 # Step 3: Generate TypeScript types
 echo "Generating TypeScript types..."
-cd packages/shared-types
-pnpm exec openapi-typescript "../../${SCHEMA_PATH}" -o "src/generated.ts"
+cd "$REPO_ROOT/packages/shared-types"
+pnpm exec openapi-typescript "${SCHEMA_PATH}" -o "src/generated.ts"
 echo "Types generated at ${OUTPUT_PATH}"
 
 echo ""

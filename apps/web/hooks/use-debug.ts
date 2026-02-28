@@ -47,7 +47,7 @@ export function useHealth(autoRefresh = false) {
   });
 }
 
-export function useLogs(params?: { level?: string; category?: string; limit?: number }) {
+export function useLogs(params?: { level?: string; category?: string; limit?: number; autoRefresh?: boolean }) {
   const query = new URLSearchParams();
   if (params?.level) query.set("level", params.level);
   if (params?.category) query.set("category", params.category);
@@ -58,7 +58,7 @@ export function useLogs(params?: { level?: string; category?: string; limit?: nu
     // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["debug", "logs", params],
     queryFn: () => apiFetch(`/api/v1/debug/logs${qs ? `?${qs}` : ""}`),
-    refetchInterval: 5000,
+    refetchInterval: params?.autoRefresh !== false ? 5000 : false,
     staleTime: 2000,
   });
 }
