@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ function StatusBadge({ status }: { status: RecurringGroupRead["status"] }) {
 function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: number }) {
   const dismiss = useDismissSubscription();
   const monthly = monthlyEquivalent(sub);
+  const [showSteps, setShowSteps] = useState(false);
 
   return (
     <div
@@ -148,6 +150,15 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
             </Button>
           </a>
         )}
+        {sub.cancel_steps && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSteps((v) => !v)}
+          >
+            {showSteps ? "Hide steps" : "How to cancel"}
+          </Button>
+        )}
         {sub.status === "active" && (
           <Button
             variant="ghost"
@@ -159,6 +170,33 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
           </Button>
         )}
       </div>
+
+      {/* Cancellation steps */}
+      {showSteps && sub.cancel_steps && (
+        <div
+          style={{
+            marginTop: 10,
+            padding: "10px 12px",
+            borderRadius: "var(--radius-md, 6px)",
+            background: "var(--surface-raised, rgba(255,255,255,0.03))",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--foreground)",
+              whiteSpace: "pre-line",
+              lineHeight: 1.6,
+            }}
+          >
+            {sub.cancel_steps}
+          </p>
+          <p style={{ fontSize: 10, color: "var(--foreground-muted)", marginTop: 8 }}>
+            AI-generated — may be outdated
+          </p>
+        </div>
+      )}
     </div>
   );
 }

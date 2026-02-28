@@ -6,6 +6,10 @@ celery_app = Celery(
     "vault",
     broker=settings.redis_url,
     backend=settings.redis_url,
+    include=[
+        "app.tasks.categorise_task",
+        "app.tasks.detect_subscriptions_task",
+    ],
 )
 
 celery_app.conf.update(

@@ -45,6 +45,10 @@ async def _run_detection(user_id: str):
         transactions = list(result.scalars().all())
 
         groups = await detect_subscriptions(db, uid, transactions)
+
+        from app.ai.cancel_helper import enrich_cancellation_info
+
+        await enrich_cancellation_info(groups)
         await db.commit()
 
     await engine.dispose()
