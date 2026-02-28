@@ -1100,3 +1100,331 @@ Subscriptions page:
 **Frontend files:** ~35 TypeScript/TSX files
 **Theme modes:** Light, Dark, System (with 6 accent colours)
 **Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md, shared-types README.md
+
+---
+
+## Ian's Session 5 — "Bloomberg Meets Linear" UI Redesign (2026-02-27)
+
+**Builder:** Ian (Claude Code agent)
+**Tasks:** Comprehensive visual layer redesign — dark minimalism, data density, refined typography
+**Commits:** 9
+**Scope:** Purely visual — no hooks, APIs, or backend changes
+
+---
+
+### Design Philosophy
+
+Full UI overhaul targeting "Bloomberg Terminal density meets Linear precision." Every page redesigned with:
+- Layered surface depth system (background → surface → surface-raised → surface-overlay)
+- `rgba`-based borders instead of solid hex (subtle transparency)
+- Accent glow system (`--accent-glow`, `--shadow-glow`) for emphasis
+- JetBrains Mono for all financial figures via `mono-lg` / `mono-xl` utility classes
+- `label` utility class (11px uppercase tracking) for section headers
+- Inline style-based components (moved away from Tailwind class soup for complex styling)
+
+---
+
+### Commit 1: Design System Foundation
+
+**What was implemented:**
+- Complete rewrite of `globals.css` token system:
+  - Layered surfaces: `--surface` (#111114), `--surface-raised` (#1a1a1f), `--surface-overlay` (#222228)
+  - `rgba` borders: `--border` (6% white), `--border-hover` (10% white), `--border-accent` (30% indigo)
+  - Accent system: `--accent-muted` (12% opacity), `--accent-glow` (6% opacity), `--shadow-glow`
+  - Semantic tints: `--income-muted`, `--spending-muted`, `--warning-muted`
+  - Gold token: `--gold` (#d4a574) for subscription totals
+  - Spacing scale: `--space-1` through `--space-10`
+  - Radius tightened: `--radius-sm` 4px, `--radius` 6px, `--radius-lg` 8px
+- Typography utilities: `.label`, `.mono`, `.mono-lg` (32px), `.mono-xl` (40px)
+- New animations: `slideInRight`, `fadeIn`, `.skeleton` shimmer class
+- Interactive elements: `button:active { transform: scale(0.98) }`
+- `::selection` styled with accent-muted background
+- `:focus-visible` uses accent colour with 2px offset
+- Switched from Google Fonts URL import to `next/font/google` (Inter + JetBrains Mono) with CSS variable injection on `<html>`
+
+**Files modified:**
+- `apps/web/app/globals.css`
+- `apps/web/app/layout.tsx`
+
+**Commit:** `ui(design-system): rewrite globals.css tokens + next/font loading`
+
+---
+
+### Commit 2: Component Primitives
+
+**What was implemented:**
+- `card.tsx` — Variant system: `default` | `elevated` | `accent` | `glass` (backdrop-blur). Padding map: `none` | `sm` | `md` | `lg`. Hover behavior via JS mouse events (border-hover, translateY, shadow). Backward compat: `interactive` prop aliases `hover`.
+- `badge.tsx` — Semantic tint variants: `success` (green bg), `danger` (red bg), `warning` (amber bg), `accent` (indigo bg), `muted` (subtle grey). Fixed 22px height, 11px font. Backward compat: `destructive` aliases `danger`, `info` aliases `accent`.
+- `EmptyState.tsx` — New component. Dashed border container with accent-glow background. Accepts `icon` (LucideIcon), `title`, `description`, `action` (ReactNode slot). 48px icon container with surface-raised background.
+- Updated barrel export `index.ts`
+
+**Files modified:**
+- `apps/web/components/ui/card.tsx`
+- `apps/web/components/ui/badge.tsx`
+- `apps/web/components/ui/index.ts`
+
+**Files created:**
+- `apps/web/components/ui/EmptyState.tsx`
+
+**Commit:** `ui(primitives): restyle Card/Badge, add EmptyState component`
+
+---
+
+### Commit 3: Sidebar Redesign
+
+**What was implemented:**
+- Split navigation into two groups: **Menu** (Dashboard, Upload, Transactions, Subscriptions) and **System** (Settings, Debug) with uppercase `label` section headers
+- Active state: 3px left accent bar (indigo, rounded) + accent-colored icon + active background tint
+- Hover transitions on inactive items: background → `sidebar-item-hover`, text → foreground
+- Logo: 28px accent-colored square with Landmark icon + mono "vault" text
+- Footer: mono 11px version number with border-top separator
+- Sticky positioning for scroll independence
+- Extracted `NavItem` as separate function component
+
+**Files modified:**
+- `apps/web/components/layout/Sidebar.tsx`
+
+**Commit:** `ui(sidebar): redesign navigation with accent bar + grouped items`
+
+---
+
+### Commit 4: Dashboard Redesign
+
+**What was implemented:**
+
+**KPICards:**
+- `mono-lg` animated numbers (32px JetBrains Mono) using existing `useCountUp` hook
+- `label` class headers (11px uppercase)
+- Shimmer skeleton loading state (`.skeleton` class)
+- Total Balance card gets `--shadow-glow` (accent glow emphasis)
+- Hover: `border-hover` + `translateY(-1px)`
+- Removed Card/CardContent wrappers — direct `div` with inline styles for full control
+
+**SpendTimeline:**
+- Gradient area fills via SVG `<linearGradient>` (income: green 25%→0%, spending: red 20%→0%)
+- Mono axis labels (11px JetBrains Mono)
+- Pill-style granularity toggle (D/W/M) with accent-muted active state
+- Styled tooltip: surface-raised bg, mono label, signed amounts
+- Removed CartesianGrid vertical lines, axis lines cleaned up
+
+**CategoryChart:**
+- Center total label overlay (mono 18px amount + "TOTAL" sublabel, `pointerEvents: none`)
+- Inline legend below chart (dot + name + mono amount per row)
+- "+N more" truncation for 6+ categories
+- Border-top separator between chart and legend
+
+**RecentTransactions:**
+- Borderless rows with hover background (`surface-raised`)
+- Mono date column (11px, 48px fixed width)
+- Amount color coding: positive = `var(--income)` with `+` prefix, negative = `var(--foreground)`
+- "View all →" link with ArrowRight icon and opacity hover
+
+**TopMerchants:**
+- 4px accent progress bars (was 8px) with staggered animation
+- Compact layout: name + mono amount on same line, bar below, txn count + category below that
+
+**Dashboard page.tsx:**
+- Asymmetric grid: `1fr + 340px` for both chart row and bottom row
+- Direct inline styles replacing PageWrapper/PageHeader
+- Max-width 1280px, 32px padding
+
+**Files modified:**
+- `apps/web/components/dashboard/KPICards.tsx`
+- `apps/web/components/dashboard/SpendTimeline.tsx`
+- `apps/web/components/dashboard/CategoryChart.tsx`
+- `apps/web/components/dashboard/RecentTransactions.tsx`
+- `apps/web/components/dashboard/TopMerchants.tsx`
+- `apps/web/app/page.tsx`
+
+**Commit:** `ui(dashboard): redesign KPIs, charts, transactions, merchants + layout`
+
+---
+
+### Commit 5: Transactions Redesign
+
+**What was implemented:**
+
+**TransactionTable:**
+- Styled search input with Search icon, accent focus border
+- Table header uses `label` class (11px uppercase)
+- Row click opens slide-over detail panel
+- Selected row highlighted with `accent-muted` background
+- Checkbox, category edit, and bulk actions click areas use `stopPropagation` to prevent slide-over trigger
+- Mono date column (12px), signed amounts with income prefix `+`
+- Category badges: `accent` variant for categorised, `muted` for uncategorised
+- Shimmer skeleton rows during loading
+
+**TransactionDetail (new component):**
+- Fixed-position slide-over panel (420px width, right-aligned)
+- Semi-transparent overlay with `fadeIn` animation
+- Panel entry with `slideInRight` animation (snappy easing)
+- Amount hero section: `mono-xl` (40px) with sign prefix and income/foreground coloring
+- Detail rows: label (left) + value (right) with border-bottom separators
+- Category selector dropdown with full category list
+- Notes textarea with accent focus border and vertical resize
+- Save/Cancel footer (only visible when changes detected)
+- Close button with hover background transition
+
+**TransactionFilters:**
+- Native inputs with consistent inline styles
+- Accent focus borders on all inputs
+- Amount inputs use mono font at 12px
+
+**BulkActions:**
+- Accent glow bar (`border-accent` + `accent-glow` background)
+- Native select for category assignment
+
+**InlineCategoryEdit:**
+- Accent border on focused select element
+
+**transactions/page.tsx:**
+- Framer Motion page wrapper with fadeIn + translateY
+- Direct inline header (no PageWrapper/PageHeader)
+
+**Files modified:**
+- `apps/web/components/transactions/TransactionTable.tsx`
+- `apps/web/components/transactions/TransactionFilters.tsx`
+- `apps/web/components/transactions/BulkActions.tsx`
+- `apps/web/components/transactions/InlineCategoryEdit.tsx`
+- `apps/web/app/transactions/page.tsx`
+
+**Files created:**
+- `apps/web/components/transactions/TransactionDetail.tsx`
+
+**Commit:** `ui(transactions): redesign table + add detail slide-over panel`
+
+---
+
+### Commit 6: Upload Page Redesign
+
+**What was implemented:**
+- Atmospheric drop zone: `radial-gradient` bloom behind icon when dragging (accent-glow center → transparent)
+- Dragging state: accent dashed border, icon scales 1.1x and turns accent-colored, 200px radial glow orb
+- File preview: accent-muted icon container, mono file size
+- Progress bar: 3px height (was 4px), accent color, snappy transition
+- Success state: `mono-lg` counters for imported/duplicates, income-colored border
+- Error state: spending-tinted background with spending-colored border
+- Supported formats table: Badge components for format (`muted`) and status (`success`)
+- `label` headers throughout
+- GitHub link with hover underline
+
+**Files modified:**
+- `apps/web/app/upload/page.tsx`
+
+**Commit:** `ui(upload): redesign drop zone with atmospheric gradient states`
+
+---
+
+### Commit 7: Subscriptions Redesign
+
+**What was implemented:**
+- Monthly total: `mono-lg` in `--gold` color (#d4a574), displayed in header-aligned card
+- Active subscription cards: 2px left accent border, hover elevation (`translateY(-1px)` + border-hover)
+- Inactive cards: standard 1px border (no accent)
+- Status badges: `success` (active + green dot), `danger` (cancelled), `warning` (paused), `muted` (uncertain)
+- Section headers use `label` class: "ACTIVE · 3", "INACTIVE · 1"
+- Empty state uses new `EmptyState` component with Wallet icon and "Upload statement" action button
+- Mono amounts with `tabular-nums` for aligned columns
+
+**Files modified:**
+- `apps/web/app/subscriptions/page.tsx`
+
+**Commit:** `ui(subscriptions): redesign cards with accent borders + gold totals`
+
+---
+
+### Commit 8: Settings + Debug Redesign
+
+**What was implemented:**
+
+**Settings:**
+- Tab navigation: border container with 3px padding, accent background + shadow on active tab
+- Hover transitions on inactive tabs (color change)
+- Framer Motion page wrapper
+- All 6 existing tabs preserved (Appearance, Profile, Categories, Accounts, Import History, Export)
+
+**Debug:**
+- Health cards: `label` headers, status dot indicator, mono latency/worker text
+- Overall status banner: colored border matching system status
+- Log level filter pills: accent-styled when active (`accent-muted` bg + `accent` color)
+- Category filter pills: accent-glow background when active
+- Log rows: `Badge` component for level (danger/warning/accent/muted variants)
+- Mono timestamps, expandable detail with hover background
+- Header actions: LIVE/PAUSED mono button, Test log, Clear logs
+
+**Files modified:**
+- `apps/web/app/settings/page.tsx`
+- `apps/web/app/debug/page.tsx`
+
+**Commit:** `ui(settings,debug): restyle tabs, health cards, log viewer`
+
+---
+
+### Commit 9: Polish
+
+**What was fixed:**
+- Removed `account_name` field reference from `TransactionDetail.tsx` (property doesn't exist on `TransactionRead` type)
+- TypeScript type-check passes clean (`npx tsc --noEmit` — 0 errors)
+
+**Files modified:**
+- `apps/web/components/transactions/TransactionDetail.tsx`
+
+**Commit:** `ui(polish): fix TypeScript errors in TransactionDetail`
+
+---
+
+### Design System: Before → After
+
+| Aspect | Before (S4) | After (S5) |
+|--------|------------|------------|
+| Surface system | 2 layers (surface, surface-raised) | 4 layers (background → surface → raised → overlay) |
+| Borders | Solid hex (`#27272a`) | `rgba` opacity (6%, 10% white) |
+| Typography | Tailwind classes only | `label`, `mono`, `mono-lg`, `mono-xl` utility classes |
+| Card component | Simple with `interactive` prop | 4 variants (default/elevated/accent/glass) + padding map |
+| Badge component | 7 Tailwind class variants | Semantic tint system with fixed 22px height |
+| KPI numbers | `text-xl font-bold` | `mono-lg` (32px JetBrains Mono, 40px line-height) |
+| Chart fills | Flat `fillOpacity={0.3}` | SVG `<linearGradient>` (top→bottom fade) |
+| Chart tooltips | Basic card | Styled with mono values, surface-raised bg |
+| Sidebar nav | Flat items with left border | Grouped (Menu/System) with accent bar + label headers |
+| Transactions | Click does nothing | Click opens slide-over detail panel |
+| Upload drag | Border color change | Radial gradient bloom + scaling icon |
+| Subscription total | White mono text | Gold `--gold` (#d4a574) mono-lg |
+| Section headers | `text-section-label` class | `label` class (11px, 500 weight, 5% tracking) |
+| Empty states | Inline JSX | Dedicated `EmptyState` component |
+| Page wrappers | PageWrapper + PageHeader | Direct inline styles with Framer Motion |
+| Focus style | Ring only | 2px accent outline with 2px offset |
+| Selection | Browser default | Accent-muted background |
+
+---
+
+## Updated Summary
+
+| Wave | Tasks | Workers | Status |
+|------|-------|---------|--------|
+| 0 | Repo setup + scaffold | Orchestrator | Done |
+| 1 | P0-07 CI pipeline | 1 | Done |
+| 2 | P0-03 + P0-05 + P0-06 (+ P0-09) | 1 (sequential) | Done |
+| 3 | 1A-01 + 1A-02 + 1A-03 | 1 (sequential) | Done |
+| 4 | 1A-06-E ∥ 1A-07-E | 2 (parallel) | Done |
+| 5 | 1B-01 ∥ 1B-04 ∥ 1B-06 ∥ 1C-01 | 4 (parallel) | Done |
+| 6 | 1C-04 ∥ 1C-05 ∥ 1C-09/10 ∥ 1C-11 | 4 (parallel) | Done |
+| 7 | Stubs + 1D-06 ∥ 1D-07 ∥ 1D-08 ∥ 1D-09 | 1 + 4 (parallel) | Done |
+| 8 | 1D-11-E ∥ 1E-04 | 2 (parallel) | Done |
+| 9 | 1E-01-E ∥ 1E-05-E | 2 (parallel) | Done |
+| Ian S2 | CI fixes + V1 backlog | 1 | Done |
+| Ian S3 | Enum fix + UI overhaul + subscription debug | 1 | Done |
+| Ian S4 | Clean theme + settings overhaul | 1 | Done |
+| Ian S5 | "Bloomberg meets Linear" UI redesign | 1 | Done |
+
+**Total commits:** 80
+**Total parser tests:** 49 passing (Amex 7 + HSBC 12 + Monzo 9 + Starling 9 + AI 12)
+**Bank parsers:** 4 (Amex, HSBC, Monzo, Starling)
+**Settings tabs:** 6 (Appearance, Profile, Categories, Accounts, Import History, Export)
+**Alembic migrations:** 8 (001–008)
+**Backend files:** ~50 Python files
+**Frontend files:** ~38 TypeScript/TSX files
+**New components this session:** EmptyState, TransactionDetail (slide-over)
+**Design tokens:** 50+ CSS custom properties
+**Typography utilities:** label, mono, mono-lg, mono-xl
+**Theme modes:** Light, Dark, System (with 6 accent colours)
+**Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md, shared-types README.md
