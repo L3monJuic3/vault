@@ -13,8 +13,8 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      DATABASE_URL: postgresql+asyncpg://vault:vault@postgres:5432/vault
-      DATABASE_URL_SYNC: postgresql://vault:vault@postgres:5432/vault
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://vault:vault@postgres:5432/vault}
+      DATABASE_URL_SYNC: ${DATABASE_URL_SYNC:-postgresql://vault:vault@postgres:5432/vault}
       REDIS_URL: redis://redis:6379/0
       JWT_SECRET: ${JWT_SECRET}
       AUTH_REQUIRED: ${AUTH_REQUIRED:-false}

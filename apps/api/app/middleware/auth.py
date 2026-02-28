@@ -8,6 +8,8 @@ from app.database import get_db
 from app.models.user import User
 from app.services.auth_service import decode_access_token, hash_password
 
+_DEFAULT_PASSWORD_HASH = hash_password("default")
+
 
 async def get_current_user(
     request: Request,
@@ -29,7 +31,7 @@ async def get_current_user(
             .values(
                 email="default@vault.local",
                 name="Default User",
-                password_hash=hash_password("default"),
+                password_hash=_DEFAULT_PASSWORD_HASH,
                 currency="GBP",
             )
             .on_conflict_do_nothing(index_elements=["email"])

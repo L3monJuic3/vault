@@ -116,7 +116,7 @@ async def process_import(
     user_id: uuid.UUID,
     filename: str,
     content: str,
-) -> Import:
+) -> tuple[Import, list[str]]:
     """
     Full import pipeline:
     1. Detect bank format

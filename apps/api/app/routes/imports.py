@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
@@ -11,7 +12,11 @@ from app.models.user import User
 from app.schemas.import_record import ImportRead
 from app.services.import_service import process_import
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/v1/imports", tags=["imports"])
+
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 
 
 @router.post("/upload", response_model=ImportRead, status_code=status.HTTP_201_CREATED)
@@ -30,6 +35,11 @@ async def upload_statement(
 
     # Read content
     raw = await file.read()
+    if len(raw) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail="File too large. Maximum allowed size is 5MB.",
+        )
     try:
         content = raw.decode("utf-8")
     except UnicodeDecodeError:
@@ -54,9 +64,12 @@ async def upload_statement(
 
             categorise_transactions_task.delay(str(user.id), transaction_ids)
             detect_subscriptions_task.delay(str(user.id))
-        except Exception:
-            # Tasks are best-effort — don't fail the upload if Celery is down
-            pass
+        except Exception as exc:
+            logger.warning(
+                "Failed to enqueue post-import tasks",
+                extra={"import_id": str(import_record.id)},
+                exc_info=exc,
+            )
 
     return ImportRead.model_validate(import_record)
 

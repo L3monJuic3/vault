@@ -1,7 +1,7 @@
 import time
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +9,18 @@ from app.database import get_db
 from app.config import settings
 from app.services.log_service import get_logs, get_log_counts, write_log
 
-router = APIRouter(prefix="/api/v1/debug", tags=["debug"])
+
+async def require_debug_mode() -> None:
+    """Block all debug routes when running in production."""
+    if settings.app_env == "production":
+        raise HTTPException(status_code=404, detail="Not Found")
+
+
+router = APIRouter(
+    prefix="/api/v1/debug",
+    tags=["debug"],
+    dependencies=[Depends(require_debug_mode)],
+)
 
 
 @router.get("/health")
