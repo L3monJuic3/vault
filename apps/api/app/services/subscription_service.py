@@ -74,14 +74,18 @@ async def get_monthly_total(db: AsyncSession, user_id: UUID) -> Decimal:
 
     total = Decimal("0")
     for sub in subscriptions:
-        amount = Decimal(str(sub.estimated_amount)) if sub.estimated_amount else Decimal("0")
+        amount = (
+            Decimal(str(sub.estimated_amount)) if sub.estimated_amount else Decimal("0")
+        )
         if sub.frequency == "weekly":
             total += amount * 52 / 12
+        elif sub.frequency == "fortnightly":
+            total += amount * 26 / 12
         elif sub.frequency == "monthly":
             total += amount
         elif sub.frequency == "quarterly":
             total += amount / 3
-        elif sub.frequency == "annual":
+        elif sub.frequency in ("annual", "yearly"):
             total += amount / 12
 
     return total.quantize(Decimal("0.01"))

@@ -31,7 +31,7 @@ def parse_starling_csv(file_content: str) -> list[dict]:
         # Amount column may include currency code in header
         amount_str = ""
         for key in row:
-            if key.startswith("Amount"):
+            if key is not None and key.startswith("Amount"):
                 amount_str = (row.get(key) or "").strip().replace(",", "")
                 break
 
@@ -57,7 +57,7 @@ def parse_starling_csv(file_content: str) -> list[dict]:
         # Balance column may include currency code in header
         balance_after = None
         for key in row:
-            if key.startswith("Balance"):
+            if key is not None and key.startswith("Balance"):
                 balance_str = (row.get(key) or "").strip().replace(",", "")
                 if balance_str:
                     try:
