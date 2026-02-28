@@ -6,6 +6,7 @@ import type { ImportRead } from "@vault/shared-types";
 
 export function useImports() {
   return useQuery<ImportRead[]>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["imports"],
     queryFn: () => apiFetch("/api/v1/imports"),
   });

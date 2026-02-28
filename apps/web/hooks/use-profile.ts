@@ -18,6 +18,7 @@ interface UserProfileUpdate {
 
 export function useProfile() {
   return useQuery<UserProfile>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["profile"],
     queryFn: () => apiFetch<UserProfile>("/api/v1/auth/me"),
   });

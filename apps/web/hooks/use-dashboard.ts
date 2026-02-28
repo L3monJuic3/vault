@@ -11,6 +11,7 @@ import type {
 
 export function useDashboardStats() {
   return useQuery<DashboardStats>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["dashboard", "stats"],
     queryFn: () => apiFetch("/api/v1/analytics/dashboard"),
   });
@@ -18,6 +19,7 @@ export function useDashboardStats() {
 
 export function useCategoryBreakdown(params?: { date_from?: string; date_to?: string }) {
   return useQuery<CategoryBreakdown[]>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["dashboard", "categories", params],
     queryFn: () => {
       const query = new URLSearchParams();
@@ -31,6 +33,7 @@ export function useCategoryBreakdown(params?: { date_from?: string; date_to?: st
 
 export function useSpendTimeline(granularity: "daily" | "weekly" | "monthly" = "monthly") {
   return useQuery<SpendTimelinePoint[]>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["dashboard", "timeline", granularity],
     queryFn: () => apiFetch(`/api/v1/analytics/timeline?granularity=${granularity}`),
   });
@@ -38,6 +41,7 @@ export function useSpendTimeline(granularity: "daily" | "weekly" | "monthly" = "
 
 export function useTopMerchants(limit: number = 5) {
   return useQuery<TopMerchant[]>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["dashboard", "merchants", limit],
     queryFn: () => apiFetch(`/api/v1/analytics/top-merchants?limit=${limit}`),
   });

@@ -45,12 +45,16 @@ echo "  Stop:  docker compose down"
 echo ""
 
 # Optionally seed demo data
-read -p "  Load demo data? (y/N) " -n 1 -r
-echo ""
+if [ -t 0 ]; then
+  read -p "  Load demo data? (y/N) " -n 1 -r || true
+  echo ""
+else
+  REPLY="n"
+fi
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "  → Seeding demo data..."
   sleep 5  # Give API a moment to fully start
-  docker compose exec api python scripts/seed_demo_data.py
+  docker compose exec -T api python scripts/seed_demo_data.py
   echo "  ✓ Demo data loaded."
 fi
 

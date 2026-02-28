@@ -39,6 +39,7 @@ export interface LogsResponse {
 
 export function useHealth(autoRefresh = false) {
   return useQuery<HealthResponse>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["debug", "health"],
     queryFn: () => apiFetch("/api/v1/debug/health"),
     refetchInterval: autoRefresh ? 10000 : false,
@@ -54,6 +55,7 @@ export function useLogs(params?: { level?: string; category?: string; limit?: nu
   const qs = query.toString();
 
   return useQuery<LogsResponse>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["debug", "logs", params],
     queryFn: () => apiFetch(`/api/v1/debug/logs${qs ? `?${qs}` : ""}`),
     refetchInterval: 5000,

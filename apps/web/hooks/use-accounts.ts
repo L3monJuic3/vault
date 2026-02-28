@@ -6,6 +6,7 @@ import type { AccountRead, AccountUpdate } from "@vault/shared-types";
 
 export function useAccounts() {
   return useQuery<AccountRead[]>({
+    // TODO: scope query key to userId when multi-user auth is enabled
     queryKey: ["accounts"],
     queryFn: () => apiFetch("/api/v1/accounts"),
   });
