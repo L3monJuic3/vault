@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,13 +36,49 @@ export function TransactionTable() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [detailTxn, setDetailTxn] = useState<TransactionRead | null>(null);
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [allItems, setAllItems] = useState<TransactionRead[]>([]);
+  const prevFiltersRef = useRef<string>("");
 
   const activeFilters = { ...filters, search: search || undefined };
-  const { data, isLoading } = useTransactions(activeFilters);
+  const { data, isLoading, isFetching } = useTransactions({ ...activeFilters, cursor });
   const { data: categories } = useCategories();
   const updateTransaction = useUpdateTransaction();
 
-  const transactions = data?.items || [];
+  // Reset accumulated items when filters/search change
+  const filtersKey = JSON.stringify(activeFilters);
+  useEffect(() => {
+    if (prevFiltersRef.current !== filtersKey) {
+      prevFiltersRef.current = filtersKey;
+      setCursor(undefined);
+      setAllItems([]);
+    }
+  }, [filtersKey]);
+
+  // Append new page results to accumulated items
+  useEffect(() => {
+    if (data?.items) {
+      if (!cursor) {
+        // First page — replace all
+        setAllItems(data.items);
+      } else {
+        // Subsequent page — append
+        setAllItems((prev) => {
+          const existingIds = new Set(prev.map((t) => t.id));
+          const newItems = data.items.filter((t) => !existingIds.has(t.id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data, cursor]);
+
+  const transactions = allItems.length > 0 ? allItems : (data?.items || []);
+
+  const handleLoadMore = () => {
+    if (data?.next_cursor) {
+      setCursor(data.next_cursor);
+    }
+  };
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -192,7 +228,15 @@ export function TransactionTable() {
                   : transactions.map((txn) => (
                       <tr
                         key={txn.id}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setDetailTxn(txn)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setDetailTxn(txn);
+                          }
+                        }}
                         style={{
                           borderBottom: "1px solid var(--border)",
                           cursor: "pointer",
@@ -322,8 +366,12 @@ export function TransactionTable() {
         {/* Load more */}
         {data?.has_more && (
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <Button variant="outline" disabled>
-              Load more
+            <Button
+              variant="outline"
+              disabled={isFetching}
+              onClick={handleLoadMore}
+            >
+              {isFetching ? "Loading..." : "Load more"}
             </Button>
           </div>
         )}

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Upload as UploadIcon, FileText } from "lucide-react";
+import { apiFetch } from "@/lib/api-client";
 
 type UploadStatus = "idle" | "dragging" | "file" | "uploading" | "success" | "error";
 
@@ -18,8 +19,6 @@ interface ImportResult {
   date_range_end: string | null;
   status: string;
 }
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 function UploadProgress() {
   const [progress, setProgress] = useState(0);
@@ -120,17 +119,10 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch(`${API_BASE}/api/v1/imports/upload`, {
+      const data = await apiFetch<ImportResult>("/api/v1/imports/upload", {
         method: "POST",
         body: formData,
       });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: "Upload failed" }));
-        throw new Error(err.detail || `Server error: ${res.status}`);
-      }
-
-      const data: ImportResult = await res.json();
       setResult(data);
       setStatus("success");
 

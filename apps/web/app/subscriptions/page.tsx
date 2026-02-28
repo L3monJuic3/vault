@@ -115,9 +115,13 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
           </div>
           <p style={{ fontSize: 12, color: "var(--foreground-muted)" }}>
             {frequencyLabel(sub.frequency)}
-            {sub.next_expected_date && (
-              <> · Next {new Date(sub.next_expected_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</>
-            )}
+            {sub.next_expected_date && (() => {
+              const [y, m, d] = sub.next_expected_date.split("-").map(Number);
+              const utcDate = new Date(Date.UTC(y, m - 1, d));
+              return (
+                <> · Next {utcDate.toLocaleDateString("en-GB", { timeZone: "UTC", day: "numeric", month: "short" })}</>
+              );
+            })()}
           </p>
         </div>
 
@@ -144,11 +148,14 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
       {/* Actions */}
       <div style={{ marginTop: 12, display: "flex", gap: 6 }}>
         {sub.cancel_url && (
-          <a href={sub.cancel_url} target="_blank" rel="noreferrer">
-            <Button variant="outline" size="sm">
-              Cancel
-            </Button>
-          </a>
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={() => window.open(sub.cancel_url!, "_blank", "noopener,noreferrer")}
+          >
+            Cancel
+          </Button>
         )}
         {sub.cancel_steps && (
           <Button
