@@ -34,10 +34,10 @@ class RecurringGroup(Base, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
     name = Column(String, nullable=False)
-    type = Column(Enum(RecurringType), nullable=False)
-    frequency = Column(Enum(Frequency), nullable=False)
+    type: Column[RecurringType] = Column(Enum(RecurringType), nullable=False)
+    frequency: Column[Frequency] = Column(Enum(Frequency), nullable=False)
     estimated_amount = Column(Numeric(12, 2), nullable=False)
-    status = Column(
+    status: Column[RecurringStatus] = Column(
         Enum(RecurringStatus), nullable=False, default=RecurringStatus.active
     )
     category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)

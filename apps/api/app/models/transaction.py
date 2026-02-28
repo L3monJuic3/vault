@@ -32,7 +32,7 @@ class Transaction(Base, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("recurring_groups.id"), nullable=True
     )
     notes = Column(Text, nullable=True)
-    tags = Column(ARRAY(String), nullable=False, default=[])
+    tags: Column[list[str]] = Column(ARRAY(String), nullable=False, default=[])
     ai_confidence = Column(Float, nullable=True)
     import_id = Column(UUID(as_uuid=True), nullable=True)
 
