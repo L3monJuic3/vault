@@ -53,7 +53,17 @@ else
 fi
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "  → Seeding demo data..."
-  sleep 5  # Give API a moment to fully start
+  echo "  Waiting for API to be ready..."
+  RETRIES=30
+  until curl -sf http://localhost:8080/health > /dev/null 2>&1; do
+    RETRIES=$((RETRIES - 1))
+    if [ "$RETRIES" -le 0 ]; then
+      echo "  ✗ API did not become ready in time"
+      exit 1
+    fi
+    sleep 2
+  done
+  echo "  ✓ API ready"
   docker compose exec -T api python scripts/seed_demo_data.py
   echo "  ✓ Demo data loaded."
 fi
