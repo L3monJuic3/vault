@@ -1,7 +1,7 @@
 import enum
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Column, ForeignKey, String
+from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DECIMAL
@@ -21,6 +21,12 @@ class AccountType(str, enum.Enum):
 
 class Account(Base, TimestampMixin):
     __tablename__ = "accounts"
+    __table_args__ = (
+        CheckConstraint(
+            "type IN ('current', 'savings', 'credit_card', 'investment', 'loan', 'mortgage', 'pension')",
+            name="ck_accounts_type_valid",
+        ),
+    )
 
     user_id = Column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True

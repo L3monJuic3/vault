@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Column, Date, ForeignKey, Numeric, String, Text
+from sqlalchemy import CheckConstraint, Column, Date, ForeignKey, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
 
@@ -30,6 +30,20 @@ class RecurringStatus(str, enum.Enum):
 
 class RecurringGroup(Base, TimestampMixin):
     __tablename__ = "recurring_groups"
+    __table_args__ = (
+        CheckConstraint(
+            "type IN ('subscription', 'direct_debit', 'standing_order', 'salary')",
+            name="ck_recurring_groups_type_valid",
+        ),
+        CheckConstraint(
+            "frequency IN ('weekly', 'fortnightly', 'monthly', 'quarterly', 'annual', 'yearly')",
+            name="ck_recurring_groups_frequency_valid",
+        ),
+        CheckConstraint(
+            "status IN ('active', 'cancelled', 'paused', 'uncertain')",
+            name="ck_recurring_groups_status_valid",
+        ),
+    )
 
     user_id = Column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True

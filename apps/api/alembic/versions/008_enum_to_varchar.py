@@ -90,3 +90,7 @@ def downgrade() -> None:
         "ALTER TABLE recurring_groups "
         "ALTER COLUMN status TYPE recurringstatus USING status::recurringstatus"
     )
+    op.execute(
+        "ALTER TABLE recurring_groups "
+        "ALTER COLUMN status SET DEFAULT 'active'::recurringstatus"
+    )
