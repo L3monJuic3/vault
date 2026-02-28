@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCountUp } from "@/hooks/use-count-up";
+import { Wallet, TrendingUp, TrendingDown, CreditCard } from "lucide-react";
 import type { DashboardStats } from "@vault/shared-types";
 
 interface KPICardsProps {
@@ -21,26 +22,30 @@ const kpiConfig = [
   {
     key: "total_balance" as const,
     label: "Total Balance",
-    icon: "\u{1F4B0}",
+    Icon: Wallet,
     colorClass: "text-[var(--foreground)]",
+    iconColor: "text-[var(--foreground-muted)]",
   },
   {
     key: "monthly_income" as const,
     label: "Monthly Income",
-    icon: "\u{1F4C8}",
+    Icon: TrendingUp,
     colorClass: "text-[var(--success)]",
+    iconColor: "text-[var(--success)]",
   },
   {
     key: "monthly_spending" as const,
     label: "Monthly Spending",
-    icon: "\u{1F4C9}",
+    Icon: TrendingDown,
     colorClass: "text-[var(--destructive)]",
+    iconColor: "text-[var(--destructive)]",
   },
   {
     key: "subscription_total" as const,
     label: "Subscriptions",
-    icon: "\u{1F4F1}",
+    Icon: CreditCard,
     colorClass: "text-[var(--primary)]",
+    iconColor: "text-[var(--primary)]",
   },
 ];
 
@@ -54,10 +59,7 @@ function AnimatedValue({
   const animated = useCountUp(value, 800);
 
   return (
-    <p
-      className={`mt-2 text-2xl font-bold ${colorClass}`}
-      style={{ fontFamily: "var(--font-mono)" }}
-    >
+    <p className={`mt-2 text-xl font-bold font-mono ${colorClass}`}>
       {formatCurrency(animated)}
     </p>
   );
@@ -69,14 +71,17 @@ export function KPICards({ stats, isLoading }: KPICardsProps) {
       {kpiConfig.map((kpi, index) => (
         <Card
           key={kpi.key}
+          interactive
           className={`animate-fade-in-up stagger-${index + 1}`}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-[var(--muted-foreground)]">
                 {kpi.label}
               </p>
-              <span className="text-xl">{kpi.icon}</span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius)] bg-[var(--muted)]">
+                <kpi.Icon size={18} className={kpi.iconColor} />
+              </div>
             </div>
             {isLoading ? (
               <Skeleton className="mt-2 h-8 w-24" />
@@ -86,7 +91,7 @@ export function KPICards({ stats, isLoading }: KPICardsProps) {
                 colorClass={kpi.colorClass}
               />
             ) : (
-              <p className={`mt-2 text-2xl font-bold ${kpi.colorClass}`}>
+              <p className={`mt-2 text-xl font-bold font-mono ${kpi.colorClass}`}>
                 &mdash;
               </p>
             )}

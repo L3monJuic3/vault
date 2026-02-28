@@ -5,76 +5,38 @@ import { CategoryChart } from "@/components/dashboard/CategoryChart";
 import { SpendTimeline } from "@/components/dashboard/SpendTimeline";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { TopMerchants } from "@/components/dashboard/TopMerchants";
+import { PageWrapper, PageHeader } from "@/components/ui";
 import { useDashboardStats } from "@/hooks/use-dashboard";
 
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
 
   const now = new Date();
-  const monthLabel = now.toLocaleString("en-GB", { month: "long", year: "numeric" });
+  const monthLabel = now.toLocaleString("en-GB", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <div
-      style={{
-        padding: "28px 32px",
-        maxWidth: "1400px",
-        margin: "0 auto",
-      }}
-    >
-      {/* Header */}
-      <div style={{ marginBottom: "24px" }}>
-        <h1
-          style={{
-            fontSize: "20px",
-            fontWeight: 600,
-            color: "var(--foreground)",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Dashboard
-        </h1>
-        <p
-          style={{
-            fontSize: "13px",
-            color: "var(--foreground-muted)",
-            marginTop: "2px",
-          }}
-        >
-          {monthLabel}
-        </p>
-      </div>
+    <PageWrapper maxWidth="2xl">
+      <PageHeader title="Dashboard" subtitle={monthLabel} />
 
       {/* KPI row */}
-      <div style={{ marginBottom: "24px" }}>
+      <div className="mb-6">
         <KPICards stats={stats} isLoading={statsLoading} />
       </div>
 
       {/* Charts row */}
-      <div
-        className="animate-fade-in-up stagger-3"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 340px",
-          gap: "16px",
-          marginBottom: "16px",
-        }}
-      >
+      <div className="animate-fade-in-up stagger-3 mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
         <SpendTimeline />
         <CategoryChart />
       </div>
 
       {/* Bottom row */}
-      <div
-        className="animate-fade-in-up stagger-5"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 300px",
-          gap: "16px",
-        }}
-      >
+      <div className="animate-fade-in-up stagger-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
         <RecentTransactions />
         <TopMerchants />
       </div>
-    </div>
+    </PageWrapper>
   );
 }
