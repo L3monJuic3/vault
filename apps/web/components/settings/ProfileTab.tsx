@@ -16,7 +16,7 @@ const CURRENCIES = [
 ];
 
 export function ProfileTab() {
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading, error, refetch } = useProfile();
   const updateProfile = useUpdateProfile();
 
   const [name, setName] = useState("");
@@ -46,6 +46,21 @@ export function ProfileTab() {
   const hasChanges =
     profile && (name !== profile.name || currency !== profile.currency);
 
+  if (error) {
+    return (
+      <Card className="max-w-md">
+        <CardContent className="p-5">
+          <p className="text-sm text-muted-foreground">
+            Failed to load profile.
+          </p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="mt-3">
+            Try again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (isLoading) {
     return (
       <Card className="max-w-md">
@@ -68,8 +83,9 @@ export function ProfileTab() {
           <div className="flex flex-col gap-5">
             {/* Name */}
             <div>
-              <label className="text-field-label">Name</label>
+              <label htmlFor="profile-name" className="text-field-label">Name</label>
               <Input
+                id="profile-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
@@ -78,8 +94,9 @@ export function ProfileTab() {
 
             {/* Email (read-only) */}
             <div>
-              <label className="text-field-label">Email</label>
+              <label htmlFor="profile-email" className="text-field-label">Email</label>
               <Input
+                id="profile-email"
                 value={profile?.email ?? ""}
                 disabled
                 className="opacity-60"
@@ -89,8 +106,9 @@ export function ProfileTab() {
 
             {/* Currency */}
             <div>
-              <label className="text-field-label">Currency</label>
+              <label htmlFor="profile-currency" className="text-field-label">Currency</label>
               <Select
+                id="profile-currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
               >

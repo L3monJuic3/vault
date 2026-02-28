@@ -13,7 +13,10 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
 };
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
+  const parts = iso.split("T")[0].split("-").map(Number);
+  const utcDate = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  return utcDate.toLocaleDateString("en-GB", {
+    timeZone: "UTC",
     day: "numeric",
     month: "short",
     year: "numeric",
