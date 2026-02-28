@@ -668,3 +668,235 @@ Already completed as part of Wave 0 scaffold.
 **Backend files:** ~50 Python files
 **Frontend files:** ~30 TypeScript/TSX files
 **Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md, shared-types README.md
+
+---
+
+## Ian's Session 3 — Enum Bug Fix + UI Overhaul (2026-02-27)
+
+**Builder:** Ian (Claude Code agent)
+**Tasks:** SQLAlchemy enum eradication, Alembic migration 008, UI animations overhaul, subscription debugging
+**Commits:** 11
+
+---
+
+### Commit 1: SQLAlchemy Enum Column Fix
+
+**What was fixed:**
+- `account.py` still had `Column(Enum(AccountType))` — changed to `Column(String(16))`
+- `recurring_group.py` had 3 `Column(Enum(...))` for type, frequency, and status — all changed to `Column(String(16))`
+- Default value changed from `RecurringStatus.active` to `"active"`
+- Python enum classes (`AccountType`, `RecurringType`, `Frequency`, `RecurringStatus`) kept as reference — only the SQLAlchemy column bindings changed
+- Also updated `upload/page.tsx` — Monzo and Starling changed from "Coming soon" to "✓ Supported"
+
+**Files modified:**
+- `apps/api/app/models/account.py`
+- `apps/api/app/models/recurring_group.py`
+- `apps/web/app/upload/page.tsx`
+
+**Commit:** `fix(models): replace SQLAlchemy Enum columns with String to fix asyncpg cast errors`
+
+---
+
+### Commits 2–7: UI Overhaul — "Bloomberg Terminal meets Linear"
+
+Complete animation and visual overhaul of the frontend. CSS-only where possible, no external animation libraries.
+
+#### Commit 2: Design Tokens + Animations (`globals.css`)
+
+**What was implemented:**
+- Glow tokens: `--glow-primary`, `--glow-success`, `--glow-error`
+- Card shadow tokens: `--card-shadow`, `--card-shadow-hover`
+- Transition easing: `--transition-snappy: cubic-bezier(0.16, 1, 0.3, 1)`
+- Keyframe animations: `fadeInUp`, `shimmer`, `pulse-glow`, `dash-march`, `checkmark-draw`, `progress-fill`
+- Utility classes: `.animate-fade-in-up`, `.animate-shimmer`, `.animate-pulse-glow`
+- Stagger delays: `.stagger-1` through `.stagger-6` (80ms increments)
+
+**Commit:** `feat(ui): add design tokens, animations, and glow effects to globals.css`
+
+#### Commit 3: Component Upgrades
+
+**What was implemented:**
+- `skeleton.tsx` — shimmer gradient animation replacing `animate-pulse`
+- `card.tsx` — `glowColor` prop for top-border glow, hover lift (`translateY(-2px)`), card shadow
+- `badge.tsx` — coloured pill variants (success green, destructive red, warning amber, info blue)
+- `button.tsx` — active pressed state: `scale(0.97)` on `:active`
+
+**Commit:** `feat(ui): upgrade skeleton, card, badge, and button components`
+
+#### Commit 4: Dashboard KPI Cards + Count-Up Hook
+
+**What was implemented:**
+- `useCountUp(target, duration=800)` hook with easeOutQuart timing
+- KPI cards rewritten with count-up number animation on mount
+- Per-card glow: income=emerald, spending=rose, subscriptions=indigo, balance=white
+- Stagger fadeInUp (each card 80ms after previous)
+- Hover: `translateY(-2px)` + shadow intensify
+- JetBrains Mono for financial figures
+
+**Files created:**
+- `apps/web/hooks/use-count-up.ts`
+
+**Files modified:**
+- `apps/web/components/dashboard/KPICards.tsx`
+- `apps/web/app/page.tsx`
+
+**Commit:** `feat(dashboard): add count-up animation and glow KPI cards`
+
+#### Commit 5: Sidebar Overhaul
+
+**What was implemented:**
+- Sidebar gradient background (`#0a0a0e` → `#0c0c12`)
+- Active nav item: indigo pill background with glow (`box-shadow: 0 0 12px`)
+- Pulsing green dot indicator on active item
+- Logo shimmer animation on hover
+- Nav items: icon+text slide 2px right on hover
+
+**Files modified:**
+- `apps/web/components/layout/Sidebar.tsx`
+
+**Commit:** `feat(ui): overhaul sidebar with glow active state and hover transitions`
+
+#### Commit 6: Upload Page Animations
+
+**What was implemented:**
+- Drop zone idle: animated dashed border (CSS `dash-march` keyframe)
+- Dragging state: pulsing indigo glow
+- File selected: card-style preview with icon, filename, file size
+- Upload progress: animated progress bar (0→100% over upload)
+- Success state: animated SVG checkmark (stroke-dashoffset draw)
+- All transitions use `--transition-snappy` easing
+
+**Files modified:**
+- `apps/web/app/upload/page.tsx`
+
+**Commit:** `feat(ui): upgrade upload page with animations and progress bar`
+
+#### Commit 7: Transactions + Subscriptions Animations
+
+**What was implemented:**
+
+Transactions page:
+- Table rows: stagger fadeInUp on load
+- Row hover: subtle left accent bar, background lift
+- Amount values: green/red colouring with JetBrains Mono
+- Category badges: coloured pill variants
+
+Subscriptions page:
+- Cards: stagger fadeInUp animation
+- Card hover: border glow in accent colour
+- Monthly total: count-up on mount (reuses `useCountUp` hook)
+- Active badge: pulsing green dot
+- Empty state: inline SVG wallet illustration
+
+**Files modified:**
+- `apps/web/app/transactions/page.tsx`
+- `apps/web/components/transactions/TransactionTable.tsx`
+- `apps/web/app/subscriptions/page.tsx`
+
+**Commit:** `feat(ui): add animations to transactions and subscriptions pages`
+
+---
+
+### Commit 8: Enum Reference Sweep (Services + AI)
+
+**What was fixed:**
+- Grepped entire codebase for `RecurringStatus.`, `RecurringType.`, `Frequency.`, `AccountType.` references
+- Replaced all Python enum value comparisons with plain string literals
+- Removed unused enum imports from all service files
+
+**Files modified:**
+- `apps/api/app/services/subscription_service.py` — `RecurringStatus.active` → `"active"`, `RecurringStatus.cancelled` → `"cancelled"`, `Frequency.*` → string literals
+- `apps/api/app/services/analytics_service.py` — same pattern, removed `Frequency` and `RecurringStatus` imports
+- `apps/api/app/services/import_service.py` — `AccountType.credit_card` → `"credit_card"`, `AccountType.current` → `"current"`
+- `apps/api/app/ai/subscription_detector.py` — all enum values replaced, function signatures changed from `Frequency` to `str`, removed `Frequency`, `RecurringStatus`, `RecurringType` imports
+
+**Commit:** `fix(api): replace all enum references with string literals across services`
+
+---
+
+### Commit 9: Alembic Migration 008 — ENUM to VARCHAR
+
+**What was implemented:**
+- Migration to convert PostgreSQL native ENUM columns to `VARCHAR(16)`
+- Columns converted: `accounts.type`, `recurring_groups.type`, `recurring_groups.frequency`, `recurring_groups.status`
+- Drops orphaned ENUM types: `accounttype`, `recurringtype`, `frequency`, `recurringstatus`
+
+**Root cause:** Changing SQLAlchemy model columns from `Enum()` to `String()` only affects parameter binding at the Python level. The actual Postgres columns remained native ENUM types, causing `asyncpg.exceptions.UndefinedFunctionError: operator does not exist: recurringstatus = character varying`.
+
+**Files created:**
+- `apps/api/alembic/versions/008_enum_to_varchar.py`
+
+**Commit:** `fix(db): add migration 008 to convert Postgres ENUM columns to VARCHAR`
+
+---
+
+### Commit 10: Migration 008 Hotfix — DROP DEFAULT
+
+**What was fixed:**
+- Migration 008 failed with `DependentObjectsStillExistError: cannot drop type recurringstatus because other objects depend on it`
+- Root cause: `recurring_groups.status` had `server_default='active'::recurringstatus` which held a reference to the enum type, blocking `DROP TYPE`
+- Fix: added `ALTER COLUMN status DROP DEFAULT` before the type conversion, then `SET DEFAULT 'active'` after
+
+**Files modified:**
+- `apps/api/alembic/versions/008_enum_to_varchar.py`
+
+**Commit:** `fix(db): drop server default before dropping recurringstatus enum type`
+
+---
+
+### Commit 11: Debug Endpoint — Manual Subscription Detection
+
+**What was implemented:**
+- `POST /api/v1/debug/run-subscription-detection` endpoint
+- Runs subscription detection synchronously (bypasses Celery) for immediate feedback
+- Fetches first user (single-user V1), loads all their transactions, runs `detect_subscriptions()`, returns results
+
+**Why needed:** After migration 008 fixed the database schema, subscriptions still showed empty. Investigation revealed:
+1. The Celery `detect_subscriptions_task` had silently exhausted its 3 retries before migration 008 existed
+2. The import route catches Celery dispatch errors with bare `except: pass`, making the failure invisible
+3. No subscriptions were ever created because the detection never ran successfully
+4. Running the debug endpoint manually found 3 subscriptions: MICROSOFT 365 (£9.99/mo), DISCORD INC (£9.99/mo), TFL TRAVEL (£4.50/wk)
+
+**Files modified:**
+- `apps/api/app/routes/debug.py`
+
+**Commit:** `feat(debug): add POST /debug/run-subscription-detection endpoint`
+
+---
+
+### Key Bugs Squashed This Session
+
+| Bug | Root Cause | Fix |
+|-----|-----------|-----|
+| `UndefinedFunctionError: recurringstatus = character varying` | SQLAlchemy `Enum()` columns tell asyncpg to cast as Postgres enum types | Changed model columns to `String(16)`, created migration 008 to ALTER TABLE |
+| `DependentObjectsStillExistError` on migration | `server_default` on status column referenced `recurringstatus` type | DROP DEFAULT before ALTER TYPE, SET DEFAULT after |
+| Subscriptions page shows 0 items | Celery task silently failed 3x before enum fix existed | Added debug endpoint for manual detection, verified 3 subs found |
+
+---
+
+## Updated Summary
+
+| Wave | Tasks | Workers | Status |
+|------|-------|---------|--------|
+| 0 | Repo setup + scaffold | Orchestrator | Done |
+| 1 | P0-07 CI pipeline | 1 | Done |
+| 2 | P0-03 + P0-05 + P0-06 (+ P0-09) | 1 (sequential) | Done |
+| 3 | 1A-01 + 1A-02 + 1A-03 | 1 (sequential) | Done |
+| 4 | 1A-06-E ∥ 1A-07-E | 2 (parallel) | Done |
+| 5 | 1B-01 ∥ 1B-04 ∥ 1B-06 ∥ 1C-01 | 4 (parallel) | Done |
+| 6 | 1C-04 ∥ 1C-05 ∥ 1C-09/10 ∥ 1C-11 | 4 (parallel) | Done |
+| 7 | Stubs + 1D-06 ∥ 1D-07 ∥ 1D-08 ∥ 1D-09 | 1 + 4 (parallel) | Done |
+| 8 | 1D-11-E ∥ 1E-04 | 2 (parallel) | Done |
+| 9 | 1E-01-E ∥ 1E-05-E | 2 (parallel) | Done |
+| Ian S2 | CI fixes + V1 backlog | 1 | Done |
+| Ian S3 | Enum fix + UI overhaul + subscription debug | 1 | Done |
+
+**Total commits:** 64
+**Total parser tests:** 49 passing (Amex 7 + HSBC 12 + Monzo 9 + Starling 9 + AI 12)
+**Bank parsers:** 4 (Amex, HSBC, Monzo, Starling)
+**Settings tabs:** 4 (Categories, Accounts, Import History, Export)
+**Alembic migrations:** 8 (001–008)
+**Backend files:** ~50 Python files
+**Frontend files:** ~30 TypeScript/TSX files
+**UI animations:** fadeInUp, shimmer, pulse-glow, dash-march, checkmark-draw, progress-fill, count-up
+**Documentation:** README.md, ARCHITECTURE.md, AGENT_GUIDE.md, BUILD_LOG.md, shared-types README.md
