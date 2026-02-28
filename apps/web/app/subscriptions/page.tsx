@@ -1,9 +1,11 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, PageWrapper, PageHeader, Badge, Button } from "@/components/ui";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Wallet } from "lucide-react";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useSubscriptions, useDismissSubscription } from "@/hooks/use-subscriptions";
+import { cn } from "@/lib/utils";
 import type { RecurringGroupRead } from "@vault/shared-types";
 
 function formatCurrency(amount: number): string {
@@ -33,54 +35,28 @@ function monthlyEquivalent(sub: RecurringGroupRead): number {
 function AnimatedTotal({ value }: { value: number }) {
   const animated = useCountUp(value, 800);
   return (
-    <p
-      style={{
-        fontFamily: "var(--font-mono)",
-        fontSize: "22px",
-        fontWeight: 700,
-        color: "var(--foreground)",
-      }}
-    >
+    <p className="text-xl font-bold font-mono text-[var(--foreground)]">
       {formatCurrency(animated)}
     </p>
   );
 }
 
+const statusVariant: Record<string, "success" | "destructive" | "warning" | "secondary"> = {
+  active: "success",
+  cancelled: "destructive",
+  paused: "warning",
+  uncertain: "secondary",
+};
+
 function StatusBadge({ status }: { status: RecurringGroupRead["status"] }) {
-  const styles: Record<string, { bg: string; color: string }> = {
-    active: { bg: "rgba(16, 185, 129, 0.12)", color: "var(--success)" },
-    cancelled: { bg: "rgba(239, 68, 68, 0.1)", color: "var(--destructive)" },
-    paused: { bg: "rgba(245, 158, 11, 0.12)", color: "var(--warning)" },
-    uncertain: { bg: "var(--muted)", color: "var(--foreground-muted)" },
-  };
-  const s = styles[status] ?? styles.uncertain;
+  const variant = statusVariant[status] ?? "secondary";
   return (
-    <span
-      style={{
-        fontSize: "11px",
-        fontWeight: 500,
-        padding: "2px 8px",
-        borderRadius: "20px",
-        background: s.bg,
-        color: s.color,
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "4px",
-      }}
-    >
+    <Badge variant={variant} className="text-[11px]">
       {status === "active" && (
-        <span
-          style={{
-            width: "5px",
-            height: "5px",
-            borderRadius: "50%",
-            background: "var(--success)",
-            display: "inline-block",
-          }}
-        />
+        <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
       )}
       {status}
-    </span>
+    </Badge>
   );
 }
 
@@ -90,30 +66,21 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
 
   return (
     <Card
-      className={`animate-fade-in-up stagger-${Math.min(index + 1, 6)}`}
-      style={{
-        transition: "all 0.2s var(--transition-snappy)",
-      }}
+      interactive
+      className={cn(
+        `animate-fade-in-up stagger-${Math.min(index + 1, 6)}`,
+      )}
     >
-      <CardContent style={{ padding: "16px" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-              <p
-                style={{
-                  fontWeight: 600,
-                  fontSize: "14px",
-                  color: "var(--foreground)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-center gap-2">
+              <p className="truncate text-sm font-semibold text-[var(--foreground)]">
                 {sub.merchant_name ?? sub.name}
               </p>
               <StatusBadge status={sub.status} />
             </div>
-            <p style={{ fontSize: "12px", color: "var(--foreground-muted)" }}>
+            <p className="text-xs text-[var(--foreground-muted)]">
               {frequencyLabel(sub.frequency)}
               {sub.next_expected_date && (
                 <> · Next {new Date(sub.next_expected_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</>
@@ -121,18 +88,11 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
             </p>
           </div>
 
-          <div style={{ textAlign: "right", flexShrink: 0 }}>
-            <p
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontWeight: 600,
-                fontSize: "16px",
-                color: "var(--foreground)",
-              }}
-            >
+          <div className="flex-shrink-0 text-right">
+            <p className="font-mono text-base font-semibold text-[var(--foreground)]">
               {formatCurrency(sub.estimated_amount ?? 0)}
             </p>
-            <p style={{ fontSize: "11px", color: "var(--foreground-muted)", marginTop: "2px" }}>
+            <p className="mt-0.5 text-[11px] text-[var(--foreground-muted)]">
               {monthly !== (sub.estimated_amount ?? 0)
                 ? `${formatCurrency(monthly)}/mo`
                 : "per month"}
@@ -141,42 +101,28 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+        <div className="mt-3 flex gap-2">
           {sub.cancel_url && (
             <a
               href={sub.cancel_url}
               target="_blank"
               rel="noreferrer"
-              style={{
-                fontSize: "12px",
-                color: "var(--primary)",
-                textDecoration: "none",
-                padding: "4px 10px",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-sm)",
-                transition: "all 0.15s",
-              }}
             >
-              Cancel ↗
+              <Button variant="outline" size="sm" className="h-7 text-xs">
+                Cancel
+              </Button>
             </a>
           )}
           {sub.status === "active" && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
               onClick={() => dismiss.mutate(sub.id)}
               disabled={dismiss.isPending}
-              style={{
-                fontSize: "12px",
-                color: "var(--foreground-muted)",
-                background: "transparent",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-sm)",
-                padding: "4px 10px",
-                cursor: "pointer",
-                transition: "all 0.15s",
-              }}
             >
               Dismiss
-            </button>
+            </Button>
           )}
         </div>
       </CardContent>
@@ -187,13 +133,13 @@ function SubscriptionCard({ sub, index }: { sub: RecurringGroupRead; index: numb
 function SkeletonCard() {
   return (
     <Card>
-      <CardContent style={{ padding: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-          <Skeleton style={{ height: "16px", width: "140px" }} />
-          <Skeleton style={{ height: "16px", width: "60px" }} />
+      <CardContent className="p-4">
+        <div className="mb-2 flex justify-between">
+          <Skeleton className="h-4 w-[140px]" />
+          <Skeleton className="h-4 w-[60px]" />
         </div>
-        <Skeleton style={{ height: "12px", width: "100px", marginBottom: "12px" }} />
-        <Skeleton style={{ height: "28px", width: "80px" }} />
+        <Skeleton className="mb-3 h-3 w-[100px]" />
+        <Skeleton className="h-7 w-[80px]" />
       </CardContent>
     </Card>
   );
@@ -201,37 +147,19 @@ function SkeletonCard() {
 
 function EmptyState() {
   return (
-    <div
-      className="animate-fade-in-up"
-      style={{
-        padding: "48px 32px",
-        textAlign: "center",
-        border: "1px dashed var(--border)",
-        borderRadius: "var(--radius-lg)",
-      }}
-    >
-      {/* Inline wallet SVG */}
-      <svg
-        width="64"
-        height="64"
-        viewBox="0 0 64 64"
-        fill="none"
-        style={{ margin: "0 auto 16px", opacity: 0.4 }}
-      >
-        <rect x="8" y="16" width="48" height="36" rx="4" stroke="var(--foreground-muted)" strokeWidth="2" />
-        <path d="M8 24H56" stroke="var(--foreground-muted)" strokeWidth="2" />
-        <rect x="40" y="30" width="12" height="8" rx="2" stroke="var(--foreground-muted)" strokeWidth="2" />
-        <circle cx="46" cy="34" r="1.5" fill="var(--foreground-muted)" />
-        <path d="M16 16V14C16 11.79 17.79 10 20 10H44C46.21 10 48 11.79 48 14V16" stroke="var(--foreground-muted)" strokeWidth="2" />
-      </svg>
-      <p style={{ color: "var(--foreground-muted)", fontSize: "14px", marginBottom: "4px" }}>
+    <div className="animate-fade-in-up rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] p-12 text-center">
+      <Wallet
+        size={48}
+        className="mx-auto mb-4 text-[var(--foreground-muted)] opacity-40"
+      />
+      <p className="mb-1 text-sm text-[var(--foreground-muted)]">
         No active subscriptions detected yet.
       </p>
-      <p style={{ fontSize: "13px" }}>
-        <a href="/upload" style={{ color: "var(--primary)", textDecoration: "none" }}>
+      <p className="text-[13px]">
+        <a href="/upload" className="text-[var(--primary)] hover:underline">
           Upload a statement
         </a>{" "}
-        <span style={{ color: "var(--foreground-muted)" }}>to get started.</span>
+        <span className="text-[var(--foreground-muted)]">to get started.</span>
       </p>
     </div>
   );
@@ -244,75 +172,40 @@ export default function SubscriptionsPage() {
   const inactive = data?.items.filter((s) => s.status !== "active") ?? [];
 
   return (
-    <div className="animate-fade-in-up" style={{ padding: "28px 32px", maxWidth: "1100px", margin: "0 auto" }}>
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: "24px",
-        }}
+    <PageWrapper maxWidth="xl" className="animate-fade-in-up">
+      <PageHeader
+        title="Subscriptions"
+        subtitle="Recurring payments detected from your statements."
       >
-        <div>
-          <h1
-            style={{
-              fontSize: "20px",
-              fontWeight: 600,
-              color: "var(--foreground)",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Subscriptions
-          </h1>
-          <p style={{ fontSize: "13px", color: "var(--foreground-muted)", marginTop: "2px" }}>
-            Recurring payments detected from your statements.
-          </p>
-        </div>
-
         {data && (
-          <div
-            className="animate-fade-in-up stagger-1"
-            style={{
-              textAlign: "right",
-              padding: "12px 16px",
-              background: "var(--surface-raised)",
-              borderRadius: "var(--radius)",
-              border: "1px solid var(--border)",
-            }}
-          >
-            <p style={{ fontSize: "11px", color: "var(--foreground-muted)", marginBottom: "2px" }}>
+          <div className="animate-fade-in-up stagger-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3 text-right">
+            <p className="text-[11px] text-[var(--foreground-muted)]">
               Total monthly
             </p>
             <AnimatedTotal value={data.monthly_total} />
           </div>
         )}
-      </div>
+      </PageHeader>
 
       {/* Active subscriptions */}
-      <div style={{ marginBottom: "32px" }}>
-        <h2
-          style={{
-            fontSize: "12px",
-            fontWeight: 600,
-            color: "var(--foreground-muted)",
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-            marginBottom: "12px",
-          }}
-        >
+      <div className="mb-8">
+        <h2 className="text-section-label mb-3">
           Active · {isLoading ? "—" : active.length}
         </h2>
 
         {isLoading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
-            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
         ) : active.length === 0 ? (
           <EmptyState />
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
-            {active.map((sub, i) => <SubscriptionCard key={sub.id} sub={sub} index={i} />)}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
+            {active.map((sub, i) => (
+              <SubscriptionCard key={sub.id} sub={sub} index={i} />
+            ))}
           </div>
         )}
       </div>
@@ -320,23 +213,16 @@ export default function SubscriptionsPage() {
       {/* Inactive / cancelled */}
       {inactive.length > 0 && (
         <div>
-          <h2
-            style={{
-              fontSize: "12px",
-              fontWeight: 600,
-              color: "var(--foreground-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              marginBottom: "12px",
-            }}
-          >
+          <h2 className="text-section-label mb-3">
             Inactive · {inactive.length}
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
-            {inactive.map((sub, i) => <SubscriptionCard key={sub.id} sub={sub} index={i} />)}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
+            {inactive.map((sub, i) => (
+              <SubscriptionCard key={sub.id} sub={sub} index={i} />
+            ))}
           </div>
         </div>
       )}
-    </div>
+    </PageWrapper>
   );
 }
