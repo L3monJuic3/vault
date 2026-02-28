@@ -1,7 +1,9 @@
 import enum
+from decimal import Decimal
 
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DECIMAL
 
 from app.models.base import Base, TimestampMixin
@@ -27,5 +29,7 @@ class Account(Base, TimestampMixin):
     type = Column(Enum(AccountType), nullable=False)
     provider = Column(String, nullable=False)
     currency = Column(String(3), nullable=False, default="GBP")
-    current_balance = Column(DECIMAL(12, 2), nullable=False, default=0)
+    current_balance: Mapped[Decimal] = mapped_column(
+        DECIMAL(12, 2), nullable=False, default=0
+    )
     is_active = Column(Boolean, nullable=False, default=True)

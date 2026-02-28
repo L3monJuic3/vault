@@ -2,6 +2,7 @@ import enum
 
 from sqlalchemy import Column, Date, Enum, ForeignKey, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import validates
 
 from app.models.base import Base, TimestampMixin
 
@@ -45,3 +46,24 @@ class RecurringGroup(Base, TimestampMixin):
     next_expected_date = Column(Date, nullable=True)
     cancel_url = Column(String, nullable=True)
     cancel_steps = Column(Text, nullable=True)
+
+    @validates("type")
+    def validate_type(self, key: str, value: str) -> str:
+        valid = [e.value for e in RecurringType]
+        if value not in valid:
+            raise ValueError(f"Invalid recurring group type: {value!r}")
+        return value
+
+    @validates("frequency")
+    def validate_frequency(self, key: str, value: str) -> str:
+        valid = [e.value for e in Frequency]
+        if value not in valid:
+            raise ValueError(f"Invalid recurring group frequency: {value!r}")
+        return value
+
+    @validates("status")
+    def validate_status(self, key: str, value: str) -> str:
+        valid = [e.value for e in RecurringStatus]
+        if value not in valid:
+            raise ValueError(f"Invalid recurring group status: {value!r}")
+        return value
